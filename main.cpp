@@ -11,12 +11,20 @@ set<cave> caves;
 vector<cave> visited;
 vector<vector<cave>> complete;
 
+bool small_cave_twice = false;
+
 void visit(const cave& entered)
 {
-    if( islower(entered[0]) &&
-        (find(visited.begin(), visited.end(), entered) != visited.end()) )
+    bool is_sec_small_cave = false;
+    if(islower(entered[0]))
     {
-        return; //small cave was already visited
+        if(find(visited.begin(), visited.end(), entered) != visited.end())
+        {
+            if(small_cave_twice || entered == "start")
+                return;
+            is_sec_small_cave = true;
+            small_cave_twice = true;
+        }
     }
 
     //enter cave
@@ -39,6 +47,9 @@ void visit(const cave& entered)
             visit(p.first);
     }
 
+
+    if(is_sec_small_cave)
+        small_cave_twice = false;
     visited.erase(visited.end()-1);
 }
 
@@ -65,7 +76,6 @@ int main()
         }
 
         visit("start");
-        cout << " a - total paths: " << complete.size() << endl;
 
         // cout << "caves:" << endl;
         // for(auto c : caves)
@@ -78,16 +88,17 @@ int main()
         //     cout << " " << p.first << "-" << p.second << endl;
         // cout << endl;
 
-        // size_t cnt = 0;
-        // for(auto c : complete)
-        // {
-        //     cnt++;
-        //     cout << cnt << ": ";
-        //     for(auto v : c)
-        //         cout << v << " ";
-        //     cout << endl;
-        // }
+        size_t cnt = 0;
+        for(auto c : complete)
+        {
+            cnt++;
+            cout << cnt << ": ";
+            for(auto v : c)
+                cout << v << " ";
+            cout << endl;
+        }
 
+        cout << " b - total paths: " << complete.size() << endl;
 
         infile.close();
     }
