@@ -57,6 +57,15 @@ void print_map()
     cout << endl;
 }
 
+bool all_active()
+{
+    for(auto s : rows_s)
+        for(auto c : s)
+            if(c != '0')
+                return false;
+    return true;
+}
+
 int main()
 {
     auto start = chrono::high_resolution_clock::now();
@@ -73,20 +82,19 @@ int main()
             rows_s.push_back(file_line);
         }
 
-#define cycle_qty 100
-
-        cout << "before any steps:" << endl;
-        print_map();
-        for(size_t i = 0; i < cycle_qty; i++)
+        size_t step = 0;
+        while(1)
         {
+            step++;
             update_map();
 
-            cout << "After step " << i+1 << ":" << endl;
-            print_map();
-            cout << endl;
-        }
+            if(step == 100)
+                cout << "A = total flashes after 100 steps: " << tally << endl;
 
-        cout << "A = total flashes: " << tally << endl;
+            if(all_active())
+                break;
+        }
+        cout << "B = all on after step: " << step << endl;
 
         infile.close();
     }
