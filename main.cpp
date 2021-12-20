@@ -1,87 +1,125 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+#define TYPE_SUM 0
+#define TYPE_PROD 1
+#define TYPE_MIN 2
+#define TYPE_MAX 3
 #define TYPE_LITERAL 4
+#define TYPE_GT 5
+#define TYPE_LT 6
+#define TYPE_EQ 7
 
 size_t version_sum;
 
-//#define DEBUG_PRINTS
+// result = {offset, value}
+using result_t = pair<size_t,unsigned long>;
 
-size_t parse_packet(string in) //expects binary string
+result_t parse_packet(string in) //expects binary string
 {
-#ifdef DEBUG_PRINTS
-    cout << in << endl;
-    cout << "vvvttt";
-#endif
-
     int version = stoi(in.substr(0,3), nullptr, 2);
     int type_id = stoi(in.substr(3,3), nullptr, 2);
-    size_t packet_length = 6;
-
-    string parse_s;
-    if(type_id == TYPE_LITERAL)
-    {        
-        for(int offset = 6; offset < in.size(); offset += 5)
-        {
-            packet_length += 5;
-            parse_s += in.substr(offset + 1, 4);
-#ifdef DEBUG_PRINTS
-            cout << " LLLL";
-#endif
-            if(in[offset] == '0')
-                break;
-        }
-#ifdef DEBUG_PRINTS
-        cout << endl;
-        cout << " packet literal: " << stoi(parse_s, nullptr, 2) << endl;
-#endif
-    }
-    else
-    {
-        // operator packet
-        if(in[6] == '0')
-        {
-#ifdef DEBUG_PRINTS
-            cout << "B123456789012345" << endl;
-#endif
-            int bit_length = stoi(in.substr(7, 15), nullptr, 2);
-            packet_length += 16;
-            //remaining bits account for sub packets
-            size_t read = 0;
-            while(read < bit_length)
-            {
-#ifdef DEBUG_PRINTS
-                cout << " sub parse bits:  " << read << " of " << bit_length << endl;
-#endif
-                read += parse_packet(in.substr(22 + read));
-            }
-            packet_length += read;
-        }
-        else
-        {
-#ifdef DEBUG_PRINTS
-            cout << "P12345678901" << endl;
-#endif
-            int sub_packet_qty = stoi(in.substr(7, 11), nullptr, 2);
-            packet_length += 12;
-            //remaining bits account for sub packets
-            size_t read = 0;
-            size_t qty = 0;
-            while(qty < sub_packet_qty)
-            {
-#ifdef DEBUG_PRINTS
-                cout << " sub parse p:  " << qty << "(" << read << ") of " << sub_packet_qty << endl;
-#endif
-                read += parse_packet(in.substr(18 + read));
-                qty++;
-            }
-            packet_length += read;
-        }
-    }
 
     version_sum += version;
 
-    return packet_length;
+    size_t packet_length = 6;
+
+    if(type_id == TYPE_LITERAL)
+    {        
+        string parse_s;
+        while(1)
+        {
+            parse_s += in.substr(packet_length + 1, 4);
+            packet_length += 5;
+            if(in[packet_length-5] == '0')
+                break;
+        }
+        // return literal packet
+        return {packet_length, stoul(parse_s, nullptr, 2)};
+    }
+
+    // remaining are operator packets
+
+    vector<unsigned long> packet_vals;
+
+    if(in[6] == '0')
+    {
+        packet_length += 16;
+        int bit_length = stoi(in.substr(7, 15), nullptr, 2);
+        bit_length += packet_length;
+        while(packet_length < bit_length)
+        {
+            result_t result = parse_packet(in.substr(packet_length));
+            packet_length += result.first;
+            packet_vals.push_back(result.second);
+        }
+    }
+    else
+    {
+        packet_length += 12;
+        int sub_packet_qty = stoi(in.substr(7, 11), nullptr, 2);
+        size_t qty = 0;
+        while(qty++ < sub_packet_qty)
+        {
+            result_t result = parse_packet(in.substr(packet_length));
+            packet_length += result.first;
+            packet_vals.push_back(result.second);
+        }
+    }
+
+    unsigned long calced = 0;
+    switch(type_id)
+    {
+        case TYPE_SUM:
+        {
+            for(auto n : packet_vals)
+                calced += n;
+            break; 
+        }
+        case TYPE_PROD:
+        {
+            calced = 1;
+            for(auto n : packet_vals)
+                calced *= n;
+            break;
+        }
+        case TYPE_MIN:
+        {
+            calced = ~0UL;
+            for(auto n : packet_vals)
+                if(n < calced)
+                    calced = n;
+            break;
+        }
+        case TYPE_MAX:
+        {
+            calced = 0;
+            for(auto n : packet_vals)
+                if(n > calced)
+                    calced = n;
+            break;
+        }
+        case TYPE_GT:
+        {
+            if(packet_vals[0] > packet_vals[1])
+                calced = 1;
+            break;
+        }
+        case TYPE_LT:
+        {
+            if(packet_vals[0] < packet_vals[1])
+                calced = 1;
+            break;
+        }
+        case TYPE_EQ:
+        {
+            if(packet_vals[0] == packet_vals[1])
+                calced = 1;
+            break;
+        }
+    }
+
+    return {packet_length, calced};
 }
 
 string hex_to_bin(const string& hex)
@@ -147,9 +185,6 @@ string hex_to_bin(const string& hex)
 }
 
 
-
-
-
 int main()
 {
     auto start = chrono::high_resolution_clock::now();
@@ -175,18 +210,13 @@ int main()
         }
 
         for(auto row : input)
-            cout << row << endl;
-        cout << endl;
-
-        for(auto row : input)
         {
             version_sum = 0;
-            parse_packet(hex_to_bin(row));
+            result_t result = parse_packet(hex_to_bin(row));
+            cout << row << endl;
             cout << "a - version sum: " << version_sum << endl;
-            cout << endl;
-            cout << endl;
+            cout << "b - calculated: " << result.second << endl;
         }
-        cout << endl; 
 
         cout << endl;
         infile.close();
