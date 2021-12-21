@@ -77,17 +77,14 @@ int main()
             target_y_max = stoi(y_max);
         }
 
-        // vector<Velocity> vel = { {7,2}, {6,3}, {9,0}, {17,-4} };
-        // for(auto v : vel)
-        // {
-        //     bool hit = hit_target(v);
-        //     cout << "{" << v.first << ", " << v.second << "} = " << (hit ? "hit" : "miss") << endl;
-        // }
-
+        size_t tally = 0;
         for(int x = 0; x < 1000; x++)
-            for(int y = 0; y < 1000; y++)
-                hit_target({x,y});
+            for(int y = -1000; y < 1000; y++)
+                if( hit_target({x,y}) )
+                    tally++;
+
         cout << "a - max height = " << max_y << endl;
+        cout << "b - qty of valid points = " << tally << endl;
 
         cout << endl;
         infile.close();
