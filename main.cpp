@@ -131,7 +131,7 @@ void simplify(Sf_expr& expr)
 {
     while(1)
     {
-        cout << expr << endl;;
+//        cout << expr << endl;
 
         if(explode(expr))
             continue;
@@ -141,12 +141,13 @@ void simplify(Sf_expr& expr)
     }
 }
 
-void add(Sf_expr& result, const Sf_expr& to_add)
+Sf_expr add(const Sf_expr& base, const Sf_expr& to_add)
 {
-    cout << result << " plus " << to_add << endl;
+//    cout << base << " plus " << to_add << endl;
 
-    result = "[" + result + "," + to_add + "]";
+    Sf_expr result = "[" + base + "," + to_add + "]";
     simplify(result);
+    return result;
 }
 
 unsigned long mag_(Sf_expr& expr)
@@ -215,10 +216,18 @@ int main()
 
         Sf_expr result = exprs[0];
         for(size_t i = 1; i < exprs.size(); i++)
-            add(result, exprs[i]);
-        unsigned long result_a = magnitude(result);
+            result = add(result, exprs[i]);
         cout << endl;
-        cout << "a - magnitude: " << result_a << endl;
+
+        cout << "a - final mag: " << magnitude(result) << endl;
+
+        vector<unsigned long> mags;
+        for(int i = 0; i < exprs.size(); i++)
+            for(int j = i + 1; j < exprs.size(); j++)
+                mags.push_back(magnitude(add(exprs[i],exprs[j])));                
+        sort(mags.begin(), mags.end());
+        cout << "b - largest mag: " << mags[mags.size()-1] << endl;
+
 
         cout << endl;
         infile.close();
