@@ -1,31 +1,73 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+// a) 607 and 625 too high
+
 constexpr size_t x_point = 0;
-constexpr size_t y_point = 1;
+constexpr size_t y_point = 1;             
 constexpr size_t z_point = 2;
 
 using Point = vector<int>;
-
 using Report = vector<Point>;
 using Table = vector<Report>;
 
 constexpr size_t min_match_count(12);
 
 // 6 ways axis can align (6 sides of dice)
-vector<vector<int>> axis_align{
-    {0,1,2},
-    {0,2,1},
-    {1,0,2},
-    {1,2,0},
-    {2,0,1},
-    {2,1,0} };
+vector<pair<Point,Point>> axis_align_pol{
+    { {0,1,2},  { 1, 1, 1} }, //  x  y  z
+    { {0,1,2},  { 1,-1,-1} }, //  x -y -z
+    { {0,1,2},  {-1,-1, 1} }, // -x -y  z
+    { {0,1,2},  {-1, 1,-1} }, // -x  y -z
 
-// 4 directions a side can face, and the effect on the axis polarity
-vector<vector<int>> axis_polarity{ { 1, 1, 1},
-                                   {-1,-1, 1},
-                                   {-1, 1,-1},
-                                   { 1,-1,-1}};
+    { {0,2,1},  {-1,-1,-1} }, // -x -z -y
+    { {0,2,1},  {-1, 1, 1} }, // -x  z  y
+    { {0,2,1},  { 1, 1,-1} }, //  x -z  y
+    { {0,2,1},  { 1,-1, 1} }, //  x  z -y
+
+    { {1,0,2},  {-1,-1,-1} }, // -y -x -z
+    { {1,0,2},  {-1, 1, 1} }, //  y -x  z
+    { {1,0,2},  { 1, 1,-1} }, //  y  x -z
+    { {1,0,2},  { 1,-1, 1} }, // -y  x  z
+
+    { {1,2,0},  { 1, 1, 1} }, //  y  z  x
+    { {1,2,0},  { 1,-1,-1} }, // -y -z  x
+    { {1,2,0},  {-1,-1, 1} }, // -y  z -x
+    { {1,2,0},  {-1, 1,-1} }, //  y -z -x
+
+    { {2,0,1},  { 1, 1, 1} }, //  z  x  y
+    { {2,0,1},  { 1,-1,-1} }, // -z  x -y
+    { {2,0,1},  {-1,-1, 1} }, //  z -x -y
+    { {2,0,1},  {-1, 1,-1} }, // -z -x  y
+
+    { {2,1,0},  {-1,-1,-1} }, // -z -y -x
+    { {2,1,0},  {-1, 1, 1} }, //  z  y -x
+    { {2,1,0},  { 1, 1,-1} }, // -z  y  x
+    { {2,1,0},  { 1,-1, 1} }, //  z -y  x
+};
+
+Point adjust(const Point& org, const vector<int>& al, const vector<int>& pol, const Point& offset)
+{
+    return { org[al[x_point]] * pol[x_point] + offset[x_point],
+             org[al[y_point]] * pol[y_point] + offset[y_point],
+             org[al[z_point]] * pol[z_point] + offset[z_point] };
+}
+
+Point negat(const Point& org)
+{
+    return { -org[x_point], -org[y_point], -org[z_point] };
+}
+
+bool equa(const Point& a, const Point& b)
+{
+    return (a[0]==b[0] && a[1]==b[1] && a[2]==b[2]);
+}
+
+ostream& operator<<(ostream& os, Point pt)
+{
+    os << "{" << setw(5) << pt[0] << ", " << setw(5) << pt[1] << ", " << setw(5) << pt[2] << "}";
+    return os;
+}
 
 int main()
 {
@@ -91,57 +133,25 @@ int main()
             scan_rel_abs.push_back(table_abs);
         }
 
-
-        // for(size_t i = 0; i < scanners.size(); i++)
-        // {
-        //     cout << "scan rel " << i << ": " << endl;
-
-        //     for(auto p : scan_rel[i][0])
-        //        cout << " { " <<  p[0] << ", " << p[1] << ", " << p[2] << " }" << endl;
-        //     cout << endl;
-        // }
-        // cout << endl;
-
-        // for(size_t i = 0; i < scanners.size(); i++)
-        // {
-        //     cout << "scan rel abs" << i << ": " << endl;
-
-        //     for(auto p : scan_rel_abs[i][0])
-        //        cout << " { " <<  p[0] << ", " << p[1] << ", " << p[2] << " }" << endl;
-        //     cout << endl;
-        // }
-
-        // for(size_t i = 0; i < axis_align.size(); i++)
-        //     cout << axis_align[i][0] << " " << axis_align[i][1] << " " << axis_align[i][2] << "\n";
-        // cout << endl;
-
-        // for(size_t i = 0; i < axis_polarity.size(); i++)
-        //     cout << setw(2) << axis_polarity[i][0] << " " << setw(2) << axis_polarity[i][1] << " " << setw(2) << axis_polarity[i][2] << "\n";
-        // cout << endl;
-
-
-
-
-        vector<vector<int>> scanner_align(scanners.size(), {0,1,2});
-        vector<vector<int>> scanner_pol(scanners.size(), {1,1,1});
+        vector<pair<Point,Point>> scanner_align(scanners.size(), {{0,1,2}, {1,1,1}});
         vector<Point> scanner_offset(scanners.size(), {0,0,0});
 
-        size_t completed = 1; //bitwise, scanner 1 is ref, so it is completed
-        size_t total = 0; //bitwise        
+        unsigned long long completed = 1; //bitwise, scanner 1 is ref, so it is completed
+        unsigned long long total = 0; //bitwise        
         set<pair<size_t,size_t>> attempted;
         for(size_t i = 0; i < scanners.size(); i++)
-            total |= 1U << i;
+            total |= 1ULL << i;
 
         while(completed != total)
         {
             for(size_t known = 0; known < scanners.size(); known++)
             {
-                if(!(completed & (1U << known)))
+                if(!(completed & (1ULL << known)))
                     continue; // not known yet
 
                 for(size_t un = 0; un < scanners.size(); un++)
                 {
-                    if(completed & (1U << un))
+                    if(completed & (1ULL << un))
                         continue; // known already
 
                     /* only attempt each valid pair once */
@@ -149,169 +159,63 @@ int main()
                         continue;
                     attempted.insert({known,un});
 
-
-
-
-
-
-
-
-                    /* cycle through the 6 axis alignments */
-                    for(auto al : axis_align)
+                    for(auto al : axis_align_pol)
                     {
-                        for(size_t ua_i = 0; ua_i < scan_rel_abs[un].size(); ua_i++)
+                        for(size_t ua_i = 0; ua_i < scan_rel[un].size(); ua_i++)
                         {
-                            for(size_t ka_i = 0; ka_i < scan_rel_abs[known].size(); ka_i++)
+                            for(size_t ka_i = 0; ka_i < scan_rel[known].size(); ka_i++)
                             {
                                 size_t tally = 0;
-                                size_t remain = scan_rel_abs[un][ua_i].size();
-                                for(auto up : scan_rel_abs[un][ua_i])
+                                size_t remain = scan_rel[un][ua_i].size();
+                                for(auto up : scan_rel[un][ua_i])
                                 {
                                     //check for axis-adjusted point
-                                    Point adj{up[al[x_point]], up[al[y_point]], up[al[z_point]]};
-                                    if(scan_rel_abs[known][ka_i].end() != find(scan_rel_abs[known][ka_i].begin(), scan_rel_abs[known][ka_i].end(), adj))
+                                    Point adj = adjust(up, al.first, al.second, {0,0,0});
+                                    auto result = find(scan_rel[known][ka_i].begin(), scan_rel[known][ka_i].end(), adj);
+                                    if(scan_rel[known][ka_i].end() != result)
+                                    {
                                         tally++;
+                                        // if(tally > 1) // you always get one {0,0,0} match, so skip showing those
+                                        //     cout << setw(3) << tally << " match " << un << " r" << known << ": " << *result << " = " << up << endl;
+                                    }
                                     remain--;
                                     if((tally + remain) < min_match_count)
                                         break;
                                 }
                                 if(tally >= min_match_count)
                                 {
-                                    /* at this point
-                                        scan_rel_abs[un][ua_i] and
-                                        scan_rel_abs[known][ka_i] have been tentatively matched,
-                                        but polarity has not been checked yet */
-                                    
-                                    /* cycle through the 4 axis polarity */
-                                    for(auto ap : axis_polarity)
-                                    {
-                                        tally = 0;
-                                        for(auto upr : scan_rel[un][ua_i])
-                                        {
-                                            Point adj{ upr[al[x_point]] * ap[x_point],
-                                                       upr[al[y_point]] * ap[y_point],
-                                                       upr[al[z_point]] * ap[z_point]};
-                                            auto result = find(scan_rel[known][ka_i].begin(), scan_rel[known][ka_i].end(), adj);
-                                            if(result != scan_rel[known][ka_i].end())
-                                            {
-                                                tally++;
-                                                cout << "Match found " << tally << ": { " << (*result)[0] << ", " << (*result)[1] << ", " << (*result)[2] <<
-                                                            " } = { " << upr[0] << ", " << upr[1] << ", " << upr[2] << " } " << endl;
-                                            }
-                                        }
-                                        if(tally < min_match_count)
-                                            continue;
+                                    // alignment found !!!
+                                    // calibrate...
 
+                                    //find zero points
+                                    size_t kzp;
+                                    for(kzp = 0; kzp < scanners[known].size(); kzp++)
+                                        if(equa(scan_rel[known][ka_i][kzp], {0,0,0})) 
+                                            break;
+                                    size_t uzp;
+                                    for(uzp = 0; uzp < scanners[un].size(); uzp++)
+                                        if(equa(scan_rel[un][ua_i][uzp], {0,0,0}))
+                                            break;
 
-                                        // alignment found <--------------- !!!
-                                        // todo set offset vals
+                                    /* calculate cal points */
+                                    scanner_align[un].first = adjust( al.first, scanner_align[known].first, {1,1,1}, {0,0,0});
+                                    scanner_align[un].second = adjust( al.second, scanner_align[known].first, scanner_align[known].second, {0,0,0});
 
-                                        // scanner_align[un] = {
-                                        //     al[scanner_align[known][x_point]],
-                                        //     al[scanner_align[known][y_point]],
-                                        //     al[scanner_align[known][z_point]] };
-                                        scanner_align[un] = al;
-                                        
-                                        // scanner_pol[un] = {
-                                        //     ap[x_point] * scanner_pol[known][x_point],
-                                        //     ap[y_point] * scanner_pol[known][y_point],
-                                        //     ap[z_point] * scanner_pol[known][z_point] };
-                                        scanner_pol[un] = ap;
+//                                        kf(kzp) - kf(-uf(uzp))
+                                    Point ref_to_known = adjust(negat(scanners[un][uzp]), al.first, al.second, scanners[known][kzp]);
+                                    scanner_offset[un] = adjust(ref_to_known, scanner_align[known].first, scanner_align[known].second, scanner_offset[known]);
 
+                                    cout << "scanner " << un << " found (ref " << known << "): \n";
+                                    cout << "  a match : " << scanners[un][0] << " = " << adjust(scanners[un][0], scanner_align[un].first, scanner_align[un].second, scanner_offset[un]) << endl;
+                                    cout << "  align   : " << scanner_align[un].first << endl;
+                                    cout << "  polarity: " << scanner_align[un].second << endl;
+                                    cout << "  position: " << scanner_offset[un] << endl;
+                                    cout << endl;
 
-                                        //find zero points
-                                        size_t kzp;
-                                        for(kzp = 0; kzp < scanners[known].size(); kzp++)
-                                        {
-                                            if( (scan_rel_abs[known][ka_i][kzp][x_point] == 0) &&
-                                                (scan_rel_abs[known][ka_i][kzp][y_point] == 0) &&
-                                                (scan_rel_abs[known][ka_i][kzp][z_point] == 0) )
-                                            {
-                                                break;
-                                            }
-                                        }
-                                        size_t uzp;
-                                        for(uzp = 0; uzp < scanners[un].size(); uzp++)
-                                        {
-                                            if( (scan_rel_abs[un][ua_i][uzp][x_point] == 0) &&
-                                                (scan_rel_abs[un][ua_i][uzp][y_point] == 0) &&
-                                                (scan_rel_abs[un][ua_i][uzp][z_point] == 0) )
-                                            {
-                                                break;
-                                            }
-                                        }
-
-                                        scanner_offset[un] = { scanners[known][kzp][x_point],
-                                                               scanners[known][kzp][y_point],
-                                                               scanners[known][kzp][z_point] };
-                                        
-                                        scanner_offset[un][x_point] -= scanners[un][uzp][scanner_align[un][x_point]] * scanner_pol[un][x_point];
-                                        scanner_offset[un][y_point] -= scanners[un][uzp][scanner_align[un][y_point]] * scanner_pol[un][y_point];
-                                        scanner_offset[un][z_point] -= scanners[un][uzp][scanner_align[un][z_point]] * scanner_pol[un][z_point];
-
-
-
-
-
-                                        cout << endl;
-                                        cout << "scanner " << un << " found: \n";
-                                        cout << "  align: " << scanner_align[un][0] << " " <<
-                                                               scanner_align[un][1] << " " <<
-                                                               scanner_align[un][2] << "\n";
-
-                                        cout << "  polarity: " << scanner_pol[un][0] << " " <<
-                                                                  scanner_pol[un][1] << " " <<
-                                                                  scanner_pol[un][2] << "\n";
-                                        cout << "  position: " << scanner_offset[un][0] << " " <<
-                                                                  scanner_offset[un][1] << " " <<
-                                                                  scanner_offset[un][2] << "\n";
-                                                               
-                                        cout << endl;
-
-
-
-                                        cout << "found " << un << ": " << endl;
-                                        for(auto pt : scanners[un])
-                                        {
-                                            Point adj{ scanner_offset[un][x_point] + pt[scanner_align[un][x_point]] * scanner_pol[un][x_point],
-                                                       scanner_offset[un][y_point] + pt[scanner_align[un][y_point]] * scanner_pol[un][y_point],
-                                                       scanner_offset[un][z_point] + pt[scanner_align[un][z_point]] * scanner_pol[un][z_point] };
-
-                                            cout << "  { " << pt[0] << ", " << pt[1] << ", " << pt[2] <<
-                                                            " } = { " << adj[0] << ", " << adj[1] << ", " << adj[2] << " } " << endl;
-                                            
-                                            
-                                        }
-
-                                        // cout << "found:\n";
-                                        // for(auto p : scanners[un])
-                                        // {
-                                        //     Point adj{ p[al[x_point]] * ap[x_point],
-                                        //                 p[al[y_point]] * ap[y_point],
-                                        //                 p[al[z_point]] * ap[z_point]};
-
-                                        //     auto result = find(scanners[known].begin(), scanners[known].end(), adj);
-                                        //     if(result != scanners[known].end())
-                                        //     {
-                                        //         cout << "  { " << (*result)[0] << ", " << (*result)[1] << ", " << (*result)[2] <<
-                                        //                     " } = { " << p[0] << ", " << p[1] << ", " << p[2] << " } " << endl;
-                                        //         tally++;
-                                        //     }
-                                        // }
-
-
-
-
-
-                                        asm("nop");
-
-
-
-                                        // what was unknown is now known (completed)
-                                        completed |= 1 << un;
-                                        // break out of un loop
-                                        goto bottom_un_loop;
-                                    }
+                                    // what was unknown is now known (completed)
+                                    completed |= (1ULL << un);
+                                    // break out of un loop
+                                    goto bottom_un_loop;
                                 }
                             }
                         }
@@ -322,18 +226,33 @@ bottom_un_loop:
             }
         }
 
+        set<Point> master;
+        for(size_t i = 0; i < scanners.size(); i++)
+            for(auto pt : scanners[i])
+                master.insert( adjust(pt, scanner_align[i].first, scanner_align[i].second, scanner_offset[i]) );
 
+        cout << endl;
+        cout << " total " << master.size() << ": " << endl;
+        for(auto pt : master)
+        {
+            cout << pt << "\n";
+        }
+        cout << " a - total " << master.size() << ": " << endl;
 
-        // for(size_t i = 0; i < axis_align.size(); i++)
-        //     cout << axis_align[i][0] << " " << axis_align[i][1] << " " << axis_align[i][2] << "\n";
-        // cout << endl;
-
-        // for(size_t i = 0; i < axis_polarity.size(); i++)
-        //     cout << setw(2) << axis_polarity[i][0] << " " << setw(2) << axis_polarity[i][1] << " " << setw(2) << axis_polarity[i][2] << "\n";
-        // cout << endl;
-
-        asm("nop");
-
+        unsigned long long largest_manhatten = 0;
+        for(size_t i = 0; i < scanners.size(); i++)
+        {
+            for(size_t j = i + 1; j < scanners.size(); j++)
+            {                
+                unsigned long long md = 0;
+                md += abs(scanner_offset[i][0] - scanner_offset[j][0]);
+                md += abs(scanner_offset[i][1] - scanner_offset[j][1]);
+                md += abs(scanner_offset[i][2] - scanner_offset[j][2]);
+                if(md > largest_manhatten)
+                    largest_manhatten = md;
+            }
+        }
+        cout << " b - largest manhatten distance " << largest_manhatten << endl;
 
         cout << endl;
         infile.close();
