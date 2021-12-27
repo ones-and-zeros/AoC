@@ -75,6 +75,16 @@ ostream& operator<<(ostream& os, const Image& image)
     return os;
 }
 
+size_t white_count(const Image& image)
+{
+    size_t count = 0;
+    for( auto row : image )
+        for(auto c : row)
+            if(c == p_on)
+                count++;
+    return count;
+}
+
 int main()
 {
     auto start = chrono::high_resolution_clock::now();
@@ -109,23 +119,13 @@ int main()
         vector<string> image_mod = image_org;
         background = p_off;
         for(size_t i = 0; i < 2; i++)
-        {
             image_mod = image_convert(image_mod);
+        cout << " a - light pixel count after 2 passes: " << white_count(image_mod) << "\n";
 
-            cout << "convert out" << i+1 << ":\n";
-            cout << image_mod;
-            cout << image_mod.size() << " x " << image_mod[0].size() << '\n';
-            cout << '\n';
-        }
-        unsigned long long count_on = 0;
-        unsigned long long count_off = 0;
-        for( auto row : image_mod )
-            for(auto c : row)
-                if(c == p_on)
-                    count_on++;
-                else if(c == p_off)
-                    count_off++;
-        cout << " a - light pixel count after 2 passes: " << count_on << "\n";
+        // 48 more, total 50
+        for(size_t i = 0; i < 48; i++)
+            image_mod = image_convert(image_mod);
+        cout << " b - light pixel count after 50 passes: " << white_count(image_mod) << "\n";
 
         infile.close();
     }
