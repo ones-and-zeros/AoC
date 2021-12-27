@@ -4,26 +4,81 @@ using namespace std;
 constexpr size_t board_length = 10;
 constexpr size_t winning_score = 1000;
 
-size_t a_pos = 0;
-size_t b_pos = 0;
+size_t player_1 = 0;
+size_t player_2 = 1;
+vector<size_t> other = {player_2, player_1};
 
-size_t a_score = 0;
-size_t b_score = 0;
+vector<size_t> pos = {{0}, {0}};
+vector<size_t> score = {{0}, {0}};
 
+size_t die_val = 0;
 size_t roll_die_qty = 0;
 
 int roll_die()
 {
-    static int die = 0;
-
-    roll_die_qty++;
-
-    if(die == 0 || die == 100)
-        die = 1;
+    if(die_val == 0 || die_val == 100)
+        die_val = 1;
     else
-        die++;
+        die_val++;
 
-    return die;
+    return die_val;
+}
+
+void game_a_move(int player)
+{
+    vector<int> rolls;
+    for(size_t i = 0; i < 3; i++)
+        rolls.push_back(roll_die());
+
+    int roll_total = 0;
+    for(auto r : rolls)
+        roll_total += r;
+
+    roll_die_qty+= 3;
+
+    /* move player on board */
+    pos[player] += roll_total;
+    while(pos[player] > board_length)
+        pos[player] -= board_length;
+    /* tally score per board position */
+    score[player] += pos[player];
+
+    /* display stats */
+    cout << "P" << player+1 << " rolls";
+    for(auto r : rolls)
+        cout << " " << r;
+    cout << ", total " << roll_total;
+    cout << ", move to " << pos[player];
+    cout << ", score: " << score[player] << '\n';
+    if(score[player]  >= winning_score)
+    {
+        cout << "P" << player+1 << " wins!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+
+        cout << " a - loser-score x roll_qty: " << (score[other[player]] * roll_die_qty) << '\n';
+        return;
+    }
+
+    game_a_move(other[player]);
+}
+
+
+void play_game_a(size_t start_1, size_t start_2)
+{
+    pos[player_1] = start_1;
+    pos[player_2] = start_2;
+
+    for(size_t p = player_1; p <= player_2; p++)
+        score[p] = 0;
+
+    die_val = 0;
+    roll_die_qty = 0;
+
+    cout << "New game" << '\n';
+    cout << "Player 1 starts: " << pos[player_1] << '\n';
+    cout << "Player 2 starts: " << pos[player_2] << '\n';
+    cout << '\n';
+
+    game_a_move(player_1);
 }
 
 int main()
@@ -36,6 +91,8 @@ int main()
     {
         string line;
 
+        vector<size_t> start_pos;
+
         //parse lines
         while(getline(infile, line))
         {
@@ -44,82 +101,13 @@ int main()
             getline(iss, junk, ':');
             getline(iss, pos);
 
-            if("Player 1" == line.substr(0, 8))
-                a_pos = stoi(pos);
-            else if("Player 2" == line.substr(0, 8))
-                b_pos = stoi(pos);
+            if("Player " == line.substr(0, 7))
+                start_pos.push_back(stoi(pos));
             else
                 throw range_error("input error");
         }
 
-        cout << "Player 1 starts: " << a_pos << '\n';
-        cout << "Player 2 starts: " << b_pos << '\n';
-        cout << '\n';
-
-
-        while(a_score < 1000 && b_score < 1000)
-        {
-            size_t roll_val = 0;
-            size_t roll_total = 0;
-            
-            cout << "1 rolls ";
-            for(size_t i = 0; i < 3; i++)
-            {
-                roll_val = roll_die();
-                cout << roll_val << " ";
-                roll_total += roll_val;
-            }
-            cout << ", total " << roll_total;
-
-            a_pos += roll_total;
-            while(a_pos > board_length)
-                a_pos -= board_length;
-            a_score += a_pos;
-            cout << ", move to " << a_pos;
-            cout << ", score: " << a_score << '\n';
-            if(a_score >= winning_score)
-                break;
-
-
-            roll_total = 0;
-            cout << "2 rolls ";
-            for(size_t i = 0; i < 3; i++)
-            {
-                roll_val = roll_die();
-                cout << roll_val << " ";
-                roll_total += roll_val;
-            }
-            cout << ", total " << roll_total;
-
-            b_pos += roll_total;
-            while(b_pos > board_length)
-                b_pos -= board_length;
-            b_score += b_pos;
-            cout << ", move to " << b_pos;
-            cout << ", score: " << b_score << '\n';
-            if(b_score >= winning_score)
-                break;
-
-        }
-
-
-
-        size_t loser_score;
-        if(a_score >= winning_score)
-        {
-            cout << "Player 1 wins, die rolled " << roll_die_qty << '\n';
-            cout << '\n';
-            loser_score = b_score;
-        }
-        else
-        {
-            cout << "Player 2 wins, die rolled " << roll_die_qty << ", loser = " << a_score << '\n';
-            cout << '\n';
-            loser_score = a_score;
-        }
-
-        cout <<  " loser = " << loser_score << '\n'; 
-        cout << " a - loser x roll_qty: " << (loser_score * roll_die_qty) << '\n';
+        play_game_a(start_pos[player_1], start_pos[player_2]);
 
         cout << '\n';
         infile.close();
