@@ -1,32 +1,113 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-constexpr size_t deviation = 50;
-constexpr size_t axis_range = deviation * 2 + 1; // +/- deviation, +1 for zero
-
-size_t idx_offset(int pos) { return pos + deviation; }
-
+struct Cube{
+    Cube(int x_min, int x_max, int y_min, int y_max, int z_min, int z_max)
+    :   x_min{x_min},
+        x_max{x_max},
+        y_min{y_min},
+        y_max{y_max},
+        z_min{z_min},
+        z_max{z_max}
+    { }
+    int64_t x_min;
+    int64_t x_max;
+    int64_t y_min;
+    int64_t y_max;
+    int64_t z_min;
+    int64_t z_max;
+};
 
 struct Move{
-    Move(bool turn_to, int x_min, int x_max, int y_min, int y_max, int z_min, int z_max)
-    : turn_to{turn_to},
-      x_min{x_min},
-      x_max{x_max},
-      y_min{y_min},
-      y_max{y_max},
-      z_min{z_min},
-      z_max{z_max}
+    Move(bool turn_to, Cube cube)
+    : turn_on{turn_to}, cube{cube}
     {
 
     }
-    bool turn_to;
-    int x_min;
-    int x_max;
-    int y_min;
-    int y_max;
-    int z_min;
-    int z_max;
+    Cube cube;
+    bool turn_on;
 };
+
+uint64_t calc_zone(vector<Move>& moves, Cube zone)
+{
+    uint64_t tally = 0;
+
+    vector<Move> moves_done;
+    for(auto m : moves)
+    {
+        if( (m.cube.x_min > zone.x_max) ||
+            (m.cube.x_max < zone.x_min) ||
+            (m.cube.y_min > zone.y_max) ||
+            (m.cube.y_max < zone.y_min) ||
+            (m.cube.z_min > zone.z_max) ||
+            (m.cube.z_max < zone.z_min) )
+        {
+            //out of bounds
+            continue;
+        }
+        if( m.cube.x_min < zone.x_min)
+            m.cube.x_min = zone.x_min;
+        if( m.cube.x_max > zone.x_max)
+            m.cube.x_max = zone.x_max;
+
+        if( m.cube.y_min < zone.y_min)
+            m.cube.y_min = zone.y_min;
+        if( m.cube.y_max > zone.y_max)
+            m.cube.y_max = zone.y_max;
+
+        if( m.cube.z_min < zone.z_min)
+            m.cube.z_min = zone.z_min;
+        if( m.cube.z_max > zone.z_max)
+            m.cube.z_max = zone.z_max;
+
+        uint64_t tally_prev = calc_zone(moves_done, m.cube);
+        moves_done.push_back(m); //for next time
+
+        if(m.turn_on)
+        {
+            uint64_t tally_this = (1 + m.cube.x_max - m.cube.x_min) *
+                                    (1 + m.cube.y_max - m.cube.y_min) *
+                                    (1 + m.cube.z_max - m.cube.z_min);
+            tally += (tally_this - tally_prev);
+        }
+        else
+        {
+            if(tally_prev > tally)
+                throw range_error("tally prev too big");
+            tally -= tally_prev;
+        }
+    }
+
+    return tally;
+}
+
+uint64_t calc_total(vector<Move>& moves)
+{
+    uint64_t tally = 0;
+
+    vector<Move> moves_done;
+    for(auto m : moves)
+    {
+        uint64_t tally_prev = calc_zone(moves_done, m.cube);
+        moves_done.push_back(m); //for next time
+
+        if(m.turn_on)
+        {
+            uint64_t tally_this = (1 + m.cube.x_max - m.cube.x_min) *
+                                  (1 + m.cube.y_max - m.cube.y_min) *
+                                  (1 + m.cube.z_max - m.cube.z_min);
+            tally += (tally_this - tally_prev);
+        }
+        else
+        {
+            if(tally_prev > tally)
+                throw range_error("tally prev too big");
+            tally -= tally_prev;
+        }
+    }
+
+    return tally;
+}
 
 int main()
 {
@@ -62,36 +143,12 @@ int main()
             getline(iss, junk, '.');
             getline(iss, z_max, ',');
 
-            moves.push_back( {turn_to, stoi(x_min), stoi(x_max), stoi(y_min), stoi(y_max), stoi(z_min), stoi(z_max)} );
+            moves.push_back( {turn_to, Cube(stoi(x_min), stoi(x_max), stoi(y_min), stoi(y_max), stoi(z_min), stoi(z_max))} );
         }
 
-        map<pair<int,pair<int,int>>, bool> region;
-        for(auto m : moves)
-        {
-            for(int x = m.x_min; x <= m.x_max; x++)
-            {
-                if(x < -deviation && x > deviation)
-                    continue;
 
-                for(int y = m.y_min; y <= m.y_max; y++)
-                {
-                    if(y < -deviation && y > deviation)
-                        continue;
-
-                    for(int z = m.z_min; z <= m.z_max; z++)
-                    {
-                        if(z < -deviation && z > deviation)
-                            continue;
-                        region[{x, {y, z}}] = m.turn_to;
-                    }
-                }
-            }
-        }
-        size_t tally = 0;
-        for(auto b : region)
-            if(b.second)
-                tally++;
-        cout << " a- on tally: " << tally << '\n';
+        cout << " a - init tally: " << calc_zone(moves, {-50,50,-50,50,-50,50}) << '\n';
+        cout << " b - full tally: " << calc_total(moves) << '\n';
 
 
         cout << '\n';
