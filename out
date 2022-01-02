@@ -1,31 +1,26 @@
-In file included from /usr/include/c++/9/map:61,
-                 from /usr/include/x86_64-linux-gnu/c++/9/bits/stdc++.h:81,
-                 from main.cpp:1:
-/usr/include/c++/9/bits/stl_map.h: In instantiation of ‘void std::map<_Key, _Tp, _Compare, _Alloc>::insert(_InputIterator, _InputIterator) [with _InputIterator = std::__cxx11::basic_string<char>; _Key = std::__cxx11::basic_string<char>; _Tp = std::__cxx11::basic_string<char>; _Compare = std::less<std::__cxx11::basic_string<char> >; _Alloc = std::allocator<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > >]’:
-main.cpp:40:29:   required from here
-/usr/include/c++/9/bits/stl_map.h:892:4: error: no matching function for call to ‘std::_Rb_tree<std::__cxx11::basic_string<char>, std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >, std::_Select1st<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > >, std::less<std::__cxx11::basic_string<char> >, std::allocator<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > > >::_M_insert_range_unique(std::__cxx11::basic_string<char>&, std::__cxx11::basic_string<char>&)’
-  892 |  { _M_t._M_insert_range_unique(__first, __last); }
-      |    ^~~~
-In file included from /usr/include/c++/9/map:60,
-                 from /usr/include/x86_64-linux-gnu/c++/9/bits/stdc++.h:81,
-                 from main.cpp:1:
-/usr/include/c++/9/bits/stl_tree.h:1109:2: note: candidate: ‘template<class _InputIterator> std::__enable_if_t<std::is_same<_Val, typename std::iterator_traits<_InputIterator>::value_type>::value> std::_Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::_M_insert_range_unique(_InputIterator, _InputIterator) [with _InputIterator = _InputIterator; _Key = std::__cxx11::basic_string<char>; _Val = std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >; _KeyOfValue = std::_Select1st<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > >; _Compare = std::less<std::__cxx11::basic_string<char> >; _Alloc = std::allocator<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > >]’
- 1109 |  _M_insert_range_unique(_InputIterator __first, _InputIterator __last)
-      |  ^~~~~~~~~~~~~~~~~~~~~~
-/usr/include/c++/9/bits/stl_tree.h:1109:2: note:   template argument deduction/substitution failed:
-/usr/include/c++/9/bits/stl_tree.h: In substitution of ‘template<class _InputIterator> std::__enable_if_t<std::is_same<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >, typename std::iterator_traits<_Iterator>::value_type>::value, void> std::_Rb_tree<std::__cxx11::basic_string<char>, std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >, std::_Select1st<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > >, std::less<std::__cxx11::basic_string<char> >, std::allocator<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > > >::_M_insert_range_unique<_InputIterator>(_InputIterator, _InputIterator) [with _InputIterator = std::__cxx11::basic_string<char>]’:
-/usr/include/c++/9/bits/stl_map.h:892:4:   required from ‘void std::map<_Key, _Tp, _Compare, _Alloc>::insert(_InputIterator, _InputIterator) [with _InputIterator = std::__cxx11::basic_string<char>; _Key = std::__cxx11::basic_string<char>; _Tp = std::__cxx11::basic_string<char>; _Compare = std::less<std::__cxx11::basic_string<char> >; _Alloc = std::allocator<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > >]’
-main.cpp:40:29:   required from here
-/usr/include/c++/9/bits/stl_tree.h:1109:2: error: no type named ‘value_type’ in ‘struct std::iterator_traits<std::__cxx11::basic_string<char> >’
-/usr/include/c++/9/bits/stl_map.h: In instantiation of ‘void std::map<_Key, _Tp, _Compare, _Alloc>::insert(_InputIterator, _InputIterator) [with _InputIterator = std::__cxx11::basic_string<char>; _Key = std::__cxx11::basic_string<char>; _Tp = std::__cxx11::basic_string<char>; _Compare = std::less<std::__cxx11::basic_string<char> >; _Alloc = std::allocator<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > >]’:
-main.cpp:40:29:   required from here
-/usr/include/c++/9/bits/stl_tree.h:1118:2: note: candidate: ‘template<class _InputIterator> std::__enable_if_t<(! std::is_same<_Val, typename std::iterator_traits<_InputIterator>::value_type>::value)> std::_Rb_tree<_Key, _Val, _KeyOfValue, _Compare, _Alloc>::_M_insert_range_unique(_InputIterator, _InputIterator) [with _InputIterator = _InputIterator; _Key = std::__cxx11::basic_string<char>; _Val = std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >; _KeyOfValue = std::_Select1st<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > >; _Compare = std::less<std::__cxx11::basic_string<char> >; _Alloc = std::allocator<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > >]’
- 1118 |  _M_insert_range_unique(_InputIterator __first, _InputIterator __last)
-      |  ^~~~~~~~~~~~~~~~~~~~~~
-/usr/include/c++/9/bits/stl_tree.h:1118:2: note:   template argument deduction/substitution failed:
-/usr/include/c++/9/bits/stl_tree.h: In substitution of ‘template<class _InputIterator> std::__enable_if_t<(! std::is_same<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >, typename std::iterator_traits<_Iterator>::value_type>::value), void> std::_Rb_tree<std::__cxx11::basic_string<char>, std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >, std::_Select1st<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > >, std::less<std::__cxx11::basic_string<char> >, std::allocator<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > > >::_M_insert_range_unique<_InputIterator>(_InputIterator, _InputIterator) [with _InputIterator = std::__cxx11::basic_string<char>]’:
-/usr/include/c++/9/bits/stl_map.h:892:4:   required from ‘void std::map<_Key, _Tp, _Compare, _Alloc>::insert(_InputIterator, _InputIterator) [with _InputIterator = std::__cxx11::basic_string<char>; _Key = std::__cxx11::basic_string<char>; _Tp = std::__cxx11::basic_string<char>; _Compare = std::less<std::__cxx11::basic_string<char> >; _Alloc = std::allocator<std::pair<const std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > >]’
-main.cpp:40:29:   required from here
-/usr/include/c++/9/bits/stl_tree.h:1117:16: error: no type named ‘value_type’ in ‘struct std::iterator_traits<std::__cxx11::basic_string<char> >’
- 1117 |  __enable_if_t<!__same_value_type<_InputIterator>::value>
-      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CN : C
+CC : N
+BC : B
+CH : B
+HH : N
+HC : B
+CB : H
+HN : C
+NH : C
+NB : B
+BB : N
+HB : C
+NC : B
+BH : H
+NN : C
+BN : B
+
+input : NNCB
+
+a - answer 10 iterations (1588): 1588
+sec: 0.002286
+
+    answer 22: 7967209
+sec: 1.280999
+
+

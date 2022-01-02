@@ -1,47 +1,49 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-map<string,string> lookup;
+using Tally = map<string,uint64_t>;
 
-#define max_key_len ((size_t)1024)
+map<string,char> lookup;
 
-string convert(const string& s)
+Tally tally_input(string in)
 {
-    if(s.size() == 1)
-        return s;
+    Tally tally;
 
-    if(s.size() <= max_key_len)
-        if(lookup.find(s) != lookup.end())
-            return s[0] + lookup[s] + s[s.size() - 1];
+    // for(auto l : lookup)
+    //     tally.insert({l.first, 0});
 
-    const string& str1 {s.substr(0, s.size() >> 1)};
-    const string& str2 {s.substr(str1.size(), s.size() - str1.size())};
-    const string& str_m {s.substr(str1.size() - 1, 2)};
-
-    string out = convert(str1) + lookup[str_m] + convert(str2);
-
-    if(s.size() <= max_key_len)
-        lookup.insert({s, out.substr(1, out.size() - 2)});
-
-    return out;
+    for(size_t i = 0; i < in.size() - 1; i++)
+    {
+        string substr = in.substr(i,2);
+        tally[substr]++;
+    }
+    return tally;
 }
 
-size_t calc(string s, size_t cnt)
+void print_tally(Tally tally)
 {
-    for(size_t i = 0; i < cnt; i++)
-        s = convert(s);
-
-    map<char,size_t> char_counts;
-    for(auto c : s)
-        char_counts[c]++;
-
-    vector<size_t> tallies;
-    for(auto cc: char_counts)
-        tallies.push_back(cc.second);
-    sort(tallies.begin(), tallies.end());
-    
-    return tallies[tallies.size()-1] - tallies[0]; //max - min
+    for(auto t : tally)
+        cout << t.first << ": " << t.second << '\n';
 }
+
+void step_tally(Tally& tally, string& trail)
+{
+    Tally next_tally;
+
+    for(auto t : tally)
+    {
+        string sub1 = string(1, t.first[0]) + string(1, lookup[t.first]);
+        string sub2 = string(1, lookup[t.first]) + string(1, t.first[1]);
+        next_tally[sub1] += t.second;
+        next_tally[sub2] += t.second;
+    }
+
+    // will be used for accurate final count of chars
+    trail = string(1, lookup[trail]) + string(1, trail[1]);
+
+    tally = next_tally;
+}
+
 
 int main()
 {
@@ -72,45 +74,75 @@ int main()
             getline(iss, key, ' ');
             getline(iss, junk, ' ');
             getline(iss, val, ' ');
-            lookup.insert({key, val});
+            lookup.insert({key, val[0]});
         }
 
-        for(auto lu : lookup)
-            cout << lu.first << " : " << lu.second << endl;
-        cout << endl;
-        cout << "input : " << input_s << endl;
-        cout << endl;
-
-
         start = chrono::high_resolution_clock::now();
-        size_t answer = calc(input_s, 10);
-        auto stop = chrono::high_resolution_clock::now();
-        cout << "a - answer 10: " << answer << endl;
-        auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
-        cout << "sec: " << (duration.count() / 1000000) << 
-                        "." <<  setfill('0') << setw(6) << (duration.count() % 1000000) << endl;
+
+        map<string,uint64_t> tally = {tally_input(input_s)};
+        string trailing_char_pair = input_s.substr(input_s.size()-2, 2);
+
+        cout << "input: " << input_s << '\n';
+//        print_tally(tally);
+        cout << '\n';
+
+
+        // first 10 steps - part a
+        for(size_t i = 0; i < 10; i++)
+        {
+            step_tally(tally, trailing_char_pair);
+            // cout << "step" << i+1 << ":\n";
+            // print_tally(tally);
+            // cout << '\n';
+        }
+
+        map<char, uint64_t> char_tally;
+        for(auto t : tally)
+            char_tally[t.first[0]] += t.second;
+        char_tally[trailing_char_pair[1]]++;
+
+        for(auto ct : char_tally)
+            cout << ct.first << ": " << ct.second << "\n";
+
+        vector<uint64_t> char_totals;
+        for(auto t : char_tally)
+            char_totals.push_back(t.second);
+        sort(char_totals.begin(), char_totals.end());
+
+        cout << "a 10x: max - min = " <<
+                char_totals[char_totals.size()-1] << " - " << char_totals[0] <<
+                " = " << char_totals[char_totals.size()-1] - char_totals[0] << "\n";
+        cout << "\n";
+
+        // last 30, tota l 40
+        for(size_t i = 0; i < 30; i++)
+            step_tally(tally, trailing_char_pair);
+
+        char_tally.clear();
+        for(auto t : tally)
+            char_tally[t.first[0]] += t.second;
+        char_tally[trailing_char_pair[1]]++;
+
+        // for(auto ct : char_tally)
+        //     cout << ct.first << ": " << ct.second << "\n";
+
+        char_totals.clear();
+        for(auto t : char_tally)
+            char_totals.push_back(t.second);
+        sort(char_totals.begin(), char_totals.end());
+
+        cout << "b 40x: max - min = " <<
+                char_totals[char_totals.size()-1] << " - " << char_totals[0] <<
+                " = " << char_totals[char_totals.size()-1] - char_totals[0] << "\n";
+
+
         cout << endl;
-
-
-        start = chrono::high_resolution_clock::now();
-        answer = calc(input_s, 20);
-        stop = chrono::high_resolution_clock::now();
-        cout << "    answer 20: " << answer << endl;
-        duration = chrono::duration_cast<chrono::microseconds>(stop - start);
-        cout << "sec: " << (duration.count() / 1000000) << 
-                        "." <<  setfill('0') << setw(6) << (duration.count() % 1000000) << endl;
-        cout << endl;
-
-
-        cout << endl;
-
         infile.close();
     }
 
-    // execution time
-    // auto stop = chrono::high_resolution_clock::now();
-    // auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
-    // cout << "sec: " << (duration.count() / 1000000) << 
-    //                 "." <<  setfill('0') << setw(6) << (duration.count() % 1000000) << endl;
-    // cout << endl;
+    auto stop = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
+    cout << "sec: " << (duration.count() / 1000000) << 
+                    "." <<  setfill('0') << setw(6) << (duration.count() % 1000000) << endl;
+    cout << endl;
 }
