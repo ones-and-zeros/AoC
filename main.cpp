@@ -11,6 +11,22 @@ vector<string> invalid_seq {
     {"xy"}
 };
 
+bool has_pair_two_letters(string word)
+{
+    for(size_t i = 0; i < word.size() - 3; i++)
+        if(word.size() > word.substr(i+2, word.size()-(i+2)).find(word.substr(i,2)))
+            return true;
+    return false;
+}
+
+bool has_repeat_with_letter_between(string word)
+{
+    for(size_t i = 0; i < word.size() - 2; i++)
+        if(word[i] == word[i+2])
+            return true;
+    return false;
+}
+
 bool at_least_3_vowels(string word)
 {
     uint32_t vowel_count = 0;
@@ -63,13 +79,29 @@ int main()
                 all_valid_seq(w) )
             {
                 nice_count++;
-                cout << w << ": nice\n"; 
+//                cout << w << ": nice\n"; 
             }
-            else
-                cout << w << ": naughty\n"; 
+            // else
+            //     cout << w << ": naughty\n"; 
         }
-
+        cout << "\n";
         cout << "a: total nice = " << nice_count << "\n";
+        cout << "\n";
+
+        nice_count = 0;
+        for(auto w : words)
+        {
+            if( has_pair_two_letters(w) &&
+                has_repeat_with_letter_between(w) )
+            {
+                nice_count++;
+//                cout << w << ": nice\n"; 
+            }
+            // else
+            //     cout << w << ": naughty\n"; 
+        }
+        cout << "b: total nice = " << nice_count << "\n";
+        
         cout << '\n';
         infile.close();
     }
