@@ -1,6 +1,60 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+set<string> cities;
+map<pair<string,string>, uint32_t> city_distance;
+
+set<string> travel_route;
+uint64_t travel_dist = 0;
+
+pair<set<string>,uint64_t> shortest_route;
+pair<set<string>,uint64_t> longest_route;
+
+void next_city(string city)
+{
+    if(travel_route.size() == cities.size())
+    {
+        if(travel_dist > longest_route.second)
+        {
+            longest_route.first = travel_route;
+            longest_route.second = travel_dist;
+        }
+        if(travel_dist < shortest_route.second)
+        {
+            shortest_route.first = travel_route;
+            shortest_route.second = travel_dist;
+        }
+        return;
+    }
+
+    for(auto dest : cities)
+    {
+        if(travel_route.end() != travel_route.find(dest))
+            continue;
+        travel_dist += city_distance[{city, dest}];
+        travel_route.insert(dest);
+        next_city(dest);  //start with each city
+        travel_route.erase(dest);
+        travel_dist -= city_distance[{city, dest}];
+    }
+}
+
+void travel()
+{
+    travel_dist = 0;
+    travel_route.clear();
+    shortest_route.first.clear();
+    shortest_route.second = ~0ULL;
+    longest_route.first.clear();
+    longest_route.second = 0;
+
+    for(auto city : cities)
+    {
+        travel_route.insert(city);
+        next_city(city);  //start with each city
+        travel_route.erase(city);
+    }
+}
 
 int main()
 {
@@ -18,78 +72,32 @@ int main()
         while(getline(infile, line))
         {
             s_in.push_back(line);
+            istringstream iss{line};
+            string city_a, to, city_b, eqsign, dist;
+            iss >> city_a >> to >> city_b >> eqsign >> dist;
+            if(to != "to" || eqsign != "=")
+                throw range_error("parsing error");
+
+            cities.insert(city_a);
+            cities.insert(city_b);
+            city_distance.insert({{city_a, city_b}, stoul(dist)});
+            city_distance.insert({{city_b, city_a}, stoul(dist)});
         }
 
-        // for(auto s : s_in)
-        // {
-        //     cout << s << "\n";
-        // }
+        // for(auto c : cities)
+        //     cout << c << "\n";
 
-        uint64_t char_count = 0;
-        uint64_t memory_count = 0;
-        vector<string> s_out;
-        size_t pos = 0;
-        for(auto s : s_in)
-        {
-            if(s[0] != '"' || s[s.size() - 1] != '"')
-                throw range_error("missing quotes");
+        travel();
+        
+        cout << "a) shortest trip: " << shortest_route.second << "\n";
+        for(auto city : shortest_route.first)
+            cout << "  " << city << "\n";        
+        cout << '\n';
 
-            string out = s.substr(1, s.size() - 2);
-
-            for(size_t i = 0; i + 1 < out.size(); i++)
-            {
-                if(out[i] != '\\')
-                    continue;
-
-                if(out[i + 1] == '\\')
-                    out.replace(i, 2, "\\");
-                else if(out[i + 1] == '\"')
-                    out.replace(i, 2, "\"");
-                else if(i + 3 < out.size() && out[i + 1] == 'x')
-                    out.replace(i, 4, string(1, stoul(out.substr(i+2, 2), nullptr, 16)));
-            }
-            s_out.push_back(out);
-
-            char_count += s.size();
-            memory_count += out.size();
-        }
-        cout << "a) literal - formatted = " << char_count - memory_count << "\n";
-
-        size_t full_count = 0;
-        s_out.clear();
-        pos = 0;
-        for(auto s : s_in)
-        {
-            string out = s;
-                        
-            for(size_t i = 0; i < out.size(); i++)
-            {
-                if(out[i] == '\\')
-                {
-                    out.replace(i, 1, "\\\\");
-                    i++;
-                }
-                else if(out[i] == '\"')
-                {
-                    out.replace(i, 1, "\\\"");
-                    i++;
-                }
-                // else if(i + 3 < out.size() && out[i + 1] == 'x')
-                // {
-                //     out.replace(i, 4, string(1, stoul(out.substr(i+2, 2), nullptr, 16)));
-            }
-            out.insert(out.begin(), '\"'); //leading quote
-            out.insert(out.end() - 1, '\"'); //trailing quote
-            s_out.push_back(out);
- 
-            full_count += out.size();
-        }
-
-        for(size_t i = 0; i < s_in.size(); i++)
-            cout << s_in[i] << "(" << s_in[i].size() << "): "
-                 << s_out[i] << "("<< s_out[i].size() << ")\n";
-
-        cout << "b) added escapes literal - formatted = " << full_count - char_count << "\n";
+        cout << "b) longest trip: " << longest_route.second << "\n";
+        for(auto city : longest_route.first)
+            cout << "  " << city << "\n";        
+        cout << '\n';
 
         cout << '\n';
         infile.close();
