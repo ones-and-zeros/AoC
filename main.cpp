@@ -1,9 +1,53 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-
 multimap<string,string> replacements;
-string original;
+
+uint64_t steps_min = ~0LL;
+uint64_t result_count = 0;
+constexpr uint64_t max_results{10000};
+
+void next_step(string in, size_t step)
+{
+    if(result_count >= max_results)
+        return;
+
+    if(in == "e")
+    {
+        result_count++;
+        if(step < steps_min)
+            steps_min = step;
+        return;
+    }
+
+    vector<pair<size_t, string>> all_compounds;
+    for(auto r : replacements)
+    {
+        size_t pos = in.find(r.second, 0);
+        while(in.size() > pos)
+        {
+            string compound;
+            compound += in.substr(0, pos);
+            compound += r.first;
+            compound += in.substr((pos + r.second.size()), (in.size() - (pos + r.second.size())));
+            all_compounds.push_back({compound.size(), compound});
+            pos = in.find(r.second, pos+1);
+        }
+    }
+    sort(all_compounds.begin(), all_compounds.end());
+    for(auto c : all_compounds)
+        next_step(c.second, step + 1);
+}
+
+uint64_t steps_to_create(string target)
+{
+    steps_min = ~0LL;
+    result_count = 0;
+
+    next_step(target, 0);
+
+    return steps_min;
+}
 
 int main()
 {
@@ -14,6 +58,8 @@ int main()
     if(infile.is_open())
     {
         string line;
+
+        string original;
 
         //parse lines
         while(getline(infile, line))
@@ -57,13 +103,14 @@ int main()
                 pos = original.find(r.first, pos+1);
             }
         }
-
         // cout << "unique:\n";
         // for(auto s : unique_compounds)
         //     cout << s << "\n";
-
         cout << "a) unique qty: " << unique_compounds.size() << "\n";
         
+
+        uint64_t step_qty = steps_to_create(original);
+        cout << "b) steps to create: " << step_qty << "\n";
 
 
         cout << '\n';
