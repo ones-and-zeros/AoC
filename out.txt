@@ -1,0 +1,5 @@
+a) first house w 34000000 gifts: house 786240
+b) first house w 34000000 gifts elves x 50: house 831600
+
+sec: 5.836077
+
