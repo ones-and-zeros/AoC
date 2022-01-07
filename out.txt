@@ -1,0 +1,14 @@
+a) lowest cost win: 121
+  Longsword
+  Chainmail
+  Damage+2
+  (finger)
+
+a) highest cost loss: 201
+  Dagger
+  Leather
+  Armor+3
+  Damage+3
+
+sec: 0.000398
+
