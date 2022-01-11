@@ -1,0 +1,89 @@
+
+if( false == ((z%26) + s == w) )
+    z = (z * 26) + w + t;
+
+    digit 13
+        check = +15
+        push = +4
+    digit 12
+        check = +14
+        t = 16
+    digit 11
+        s = 11
+        t = 14
+    digit 9
+        s = 14
+        t = 11
+    digit 8
+        s = 15
+        t = 13
+    digit 6
+        s = 10
+        t = 7
+    digit 4
+        s = 15
+        t = 15
+
+x = z % 26;
+z \= r;
+if( false == ((x + s) == w) )
+    z = (z * 26) + w + t;
+
+    digit 10
+        s = -13
+        t = 3
+    digit 7
+        s = -7
+        t = 11
+    digit 5
+        s = -12
+        t = 12
+    digit 3
+        s = -16
+        t = 13
+    digit 2
+        s = -9
+        t = 1
+    digit 1
+        s = -8
+        t = 15
+    digit 0
+        s = -8
+        t = 4
+
+digit 13 push - check  15 - push   4
+    digit 12 push - check  14 - push  16
+        digit 11 push - check  11 - push  14
+        digit 10 pop  - check -13 - push   3
+        digit  9 push - check  14 - push  11
+            digit  8 push - check  15 - push  13
+            digit  7 pop  - check  -7 - push  11
+            digit  6 push - check  10 - push   7
+            digit  5 pop  - check -12 - push  12
+            digit  4 push - check  15 - push  15
+            digit  3 pop  - check -16 - push  13
+        digit  2 pop  - check -9  - push   1
+    digit  1 pop  - check -8  - push  15
+digit  0 pop  - check -8  - push   4
+
+
+11,10  d10 = d11 + (14-13)
+11,10  d10 = d11 + (1)
+8,7     d8 =  d7 + 
+
+11,10
+8,7     
+6,5
+4,3
+9,2
+12,1
+13,0
+
+
+13
+12
+11
+9
+8
+6
+4
