@@ -4,6 +4,7 @@ using namespace std;
 using Point = pair<size_t, size_t>;
 
 vector<bitset<1000>> lights(1000, bitset<1000>(0));
+vector<vector<uint32_t>> lights_dim(1000, vector<uint32_t>(1000, 0));
 
 enum class Opcode { off = 0, on, toggle };
 
@@ -48,6 +49,28 @@ void run_instr(Instruct inst)
         }    
     }    
 }
+
+void run_instr_dim(Instruct inst)
+{
+    for(size_t x = inst.start.first; x <= inst.stop.first; x++)
+    {
+        for(size_t y = inst.start.second; y <= inst.stop.second; y++)
+        {
+            if(Opcode::off == inst.opcode)
+            {
+                if( lights_dim[x][y] )
+                    lights_dim[x][y]--;
+            }
+            else if(Opcode::on == inst.opcode)
+                lights_dim[x][y] += 1;
+            else if(Opcode::toggle == inst.opcode)
+                lights_dim[x][y] += 2;
+            else
+                throw range_error("unexpected instruction");
+        }    
+    }    
+}
+
 
 int main()
 {
@@ -110,17 +133,18 @@ int main()
 
         for(auto instr : program)
             run_instr(instr);
-
-        uint64_t total = 0;
         uint64_t on = 0;
         for(auto l : lights)
-        {
-            total += l.size();
             on += l.count();
-        }
-        cout << total << ": " << on << "\n";
-
-
+        cout << " a = " << on << "\n";
+        
+        for(auto instr : program)
+            run_instr_dim(instr);
+        uint64_t brightness = 0;
+        for(auto ld : lights_dim)
+            for(auto l : ld)
+                brightness += l;
+        cout << " b = " << brightness << "\n";
 
 
         cout << '\n';
