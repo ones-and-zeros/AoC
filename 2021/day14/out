@@ -1,0 +1,26 @@
+CN : C
+CC : N
+BC : B
+CH : B
+HH : N
+HC : B
+CB : H
+HN : C
+NH : C
+NB : B
+BB : N
+HB : C
+NC : B
+BH : H
+NN : C
+BN : B
+
+input : NNCB
+
+a - answer 10 iterations (1588): 1588
+sec: 0.002286
+
+    answer 22: 7967209
+sec: 1.280999
+
+
