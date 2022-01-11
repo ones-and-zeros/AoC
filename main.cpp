@@ -1,51 +1,94 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-map<string,string> lookup;
 
-#define max_key_len ((size_t)1024)
-
-string convert(const string& s)
+unsigned long calc_path_a(vector<string>& grid)
 {
-    if(s.size() == 1)
-        return s;
+    size_t x_qty = grid.size();
+    size_t y_qty = grid[0].size();
 
-    if(s.size() <= max_key_len)
-        if(lookup.find(s) != lookup.end())
-            return s[0] + lookup[s] + s[s.size() - 1];
+    // create border row\column around whole grid, initialized with MAX (worst case)
+    vector<vector<unsigned long>> sum(x_qty + 2, vector<unsigned long>(y_qty + 2,  ~(unsigned long)0));
 
-    const string& str1 {s.substr(0, s.size() >> 1)};
-    const string& str2 {s.substr(str1.size(), s.size() - str1.size())};
-    const string& str_m {s.substr(str1.size() - 1, 2)};
+    // seed a starting point as 0. (could have been at location {1,0} either)
+    sum[0][1] = 0;
 
-    string out = convert(str1) + lookup[str_m] + convert(str2);
+    bool update = true;
+    while(update)
+    {
+        update = false;
 
-    if(s.size() <= max_key_len)
-        lookup.insert({s, out.substr(1, out.size() - 2)});
+        for(size_t x=1; x<=x_qty; x++)
+        {
+            for(size_t y=1; y<=y_qty; y++)
+            {
+                unsigned long temp = min( min(sum[x-1][y], sum[x+1][y]),
+                                          min(sum[x][y+1], sum[x][y-1]));
+                temp += (grid[x-1][y-1] - '0');
+                if(sum[x][y] != temp)
+                {
+                    sum[x][y] = temp;
+                    update = true;
+                }
+            }
+        }
+    }
 
-    return out;
+    return sum[x_qty][y_qty] - sum[1][1];
 }
 
-size_t calc(string s, size_t cnt)
+unsigned long calc_path_b(vector<string>& grid)
 {
-    for(size_t i = 0; i < cnt; i++)
-        s = convert(s);
+    size_t x_qty = grid.size() * 5;
+    size_t y_qty = grid[0].size() * 5;
 
-    map<char,size_t> char_counts;
-    for(auto c : s)
-        char_counts[c]++;
+    // create border row\column around whole grid, initialized with MAX (worst case)
+    vector<vector<unsigned long>> sum(x_qty + 2, vector<unsigned long>(y_qty + 2,  ~(unsigned long)0));
 
-    vector<size_t> tallies;
-    for(auto cc: char_counts)
-        tallies.push_back(cc.second);
-    sort(tallies.begin(), tallies.end());
-    
-    return tallies[tallies.size()-1] - tallies[0]; //max - min
+    // seed a starting point as 0. (could have been at location {1,0} either)
+    sum[0][1] = 0;
+
+    bool update = true;
+
+    while(update)
+    {
+        update = false;
+
+        for(size_t x=1; x<=x_qty; x++)
+        {
+            for(size_t y=1; y<=y_qty; y++)
+            {
+                size_t x_grid = x - 1;
+                size_t y_grid = y - 1;
+
+                unsigned long val = grid[x_grid % grid.size()][y_grid % grid[0].size()] - '0';
+                val += x_grid / grid.size();
+                val += y_grid / grid[0].size();
+                // wrap from 9 to 1
+                if(val > 9)
+                    val -= 9;
+                // add value to lowest adjacent (above, below, left, or right)
+                val += min( min(sum[x-1][y], sum[x+1][y]),
+                            min(sum[x][y+1], sum[x][y-1]));
+
+                if(sum[x][y] != val)
+                {
+                    sum[x][y] = val;
+                    update = true;
+                }
+            }
+        }
+    }
+
+    return sum[x_qty][y_qty] - sum[1][1];
 }
+
 
 int main()
 {
     auto start = chrono::high_resolution_clock::now();
+
+    vector<string> grid;
 
     // execute code
     ifstream infile("input.txt");
@@ -58,51 +101,31 @@ int main()
         //parse lines
         while(getline(infile, file_line))
         {
-            if(file_line.empty())
-                continue;
+            // istringstream iss{file_line};
+            // string key, val, junk;
+            // getline(iss, key, ' ');
 
-            if(input_s.empty())
-            {
-                input_s = file_line;
-                continue;
-            }
-
-            istringstream iss{file_line};
-            string key, val, junk;
-            getline(iss, key, ' ');
-            getline(iss, junk, ' ');
-            getline(iss, val, ' ');
-            lookup.insert({key, val});
+            grid.push_back(file_line);
         }
 
-        for(auto lu : lookup)
-            cout << lu.first << " : " << lu.second << endl;
-        cout << endl;
-        cout << "input : " << input_s << endl;
+        for(auto row : grid)
+            cout << row << endl;
         cout << endl;
 
-
-        start = chrono::high_resolution_clock::now();
-        size_t answer = calc(input_s, 10);
-        auto stop = chrono::high_resolution_clock::now();
-        cout << "a - answer 10: " << answer << endl;
-        auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
-        cout << "sec: " << (duration.count() / 1000000) << 
-                        "." <<  setfill('0') << setw(6) << (duration.count() % 1000000) << endl;
+        size_t answer_a = calc_path_a(grid);
+        cout << " answer a = " << answer_a << endl;
         cout << endl;
 
-
-        start = chrono::high_resolution_clock::now();
-        answer = calc(input_s, 20);
-        stop = chrono::high_resolution_clock::now();
-        cout << "    answer 20: " << answer << endl;
-        duration = chrono::duration_cast<chrono::microseconds>(stop - start);
-        cout << "sec: " << (duration.count() / 1000000) << 
-                        "." <<  setfill('0') << setw(6) << (duration.count() % 1000000) << endl;
+        size_t answer_b = calc_path_b(grid);
+        cout << " answer b = " << answer_b << endl;
         cout << endl;
 
-
-        cout << endl;
+        // for(size_t x=1; x<=x_qty; x++)
+        // {
+        //     for(size_t y=1; y<=y_qty; y++)
+        //         cout << sum[x][y] << "\t";
+        //     cout << endl;
+        // }
 
         infile.close();
     }
