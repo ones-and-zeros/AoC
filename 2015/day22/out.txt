@@ -1,45 +1,14 @@
-Poison:  boss hp -3  timer 5
-Poison:  boss hp -3  timer 4
-  boss hp -4Poison:  boss hp -3  timer 3
-Recharge:  mana +101  timer 4
-Recharge:  mana +101  timer 3
-Recharge:  mana +101  timer 2
-Shield:  arm +7  timer 5
-Recharge:  mana +101  timer 1
-Shield:  arm +7  timer 4
-  boss hp -2  hp +2Recharge:  mana +101  timer 0
-Recharge expires
-Shield:  arm +7  timer 3
-Shield:  arm +7  timer 2
-Shield:  arm +7  timer 1
-Poison:  boss hp -3  timer 5
-Shield:  arm +7  timer 0
-Shield expires
-Poison:  boss hp -3  timer 4
-  boss hp -4Poison:  boss hp -3  timer 3
-  boss hp -4  boss hp -4  boss hp -2  hp +2  boss hp -4Shield:  arm +7  timer 5
-Shield:  arm +7  timer 4
-  boss hp -4Shield:  arm +7  timer 3
-Shield:  arm +7  timer 2
-  boss hp -4Shield:  arm +7  timer 1
-Shield:  arm +7  timer 0
-Shield expires
-  boss hp -2  hp +2Shield:  arm +7  timer 1
-Shield:  arm +7  timer 0
-Shield expires
-  boss hp -2  hp +2Shield:  arm +7  timer 3
-Shield:  arm +7  timer 2
-  boss hp -4Shield:  arm +7  timer 1
-Shield:  arm +7  timer 0
-Shield expires
-Poison:  boss hp -3  timer 5
-Poison:  boss hp -3  timer 4
-  boss hp -4Poison:  boss hp -3  timer 3
-Recharge:  mana +101  timer 4
-Recharge:  mana +101  timer 3
-  boss hp -4Recharge:  mana +101  timer 2
-a) lowest mana win: 18446744073709551615
-win 0 out of 4
+a) lowest mana win: 1269
+  Poison,	173 mana
+  Magic Missle,	53 mana
+  Recharge,	229 mana
+  Poison,	173 mana
+  Shield,	113 mana
+  Recharge,	229 mana
+  Poison,	173 mana
+  Drain,	73 mana
+  Magic Missle,	53 mana
+win 6 out of 295069
 
-sec: 0.000625
+sec: 1.019622
 

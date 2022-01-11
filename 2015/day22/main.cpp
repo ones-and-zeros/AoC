@@ -3,6 +3,7 @@ using namespace std;
 
 // a) 1415 too high
 // a) 1362 too high
+// a) 649 too low
 
 struct Spell{
     string name;
@@ -77,6 +78,7 @@ Player game_player(0,0,0,0);
 Player game_boss(0,0,0,0);
 uint64_t game_end_count = 0;
 uint64_t game_win_count = 0;
+uint64_t game_mana_used = 0;
 
 uint64_t best_mana_used = 0;
 vector<Spell> best_spell_log;
@@ -211,14 +213,10 @@ void game_win()
     game_win_count++;
     game_end_count++;
 
-    uint64_t mana_used = 0;
-    for(auto s : game_spell_log)
-        mana_used += s.mana_cost;
-
-    if(mana_used < best_mana_used)
+    if(game_mana_used < best_mana_used)
     {
         best_spell_log = game_spell_log;
-        best_mana_used = mana_used;
+        best_mana_used = game_mana_used;
     }
 }
 
@@ -236,6 +234,7 @@ void next_round()
     Player loop_top_boss = game_boss;
     vector<Spell> loop_top_spell_log = game_spell_log;
     vector<Spell> loop_top_active_spells = game_active_spells;
+    uint64_t loop_top_mana_used = game_mana_used;
     for(auto spell : spellbook)
     {
         auto it = find(game_active_spells.begin(), game_active_spells.end(), spell);
@@ -244,12 +243,17 @@ void next_round()
 //            if(it->duration > 1)
                 continue;
         }
-        if(game_player.mana < spell.mana_cost)
-            continue;
 
+        // spells are ordered low to high, so remaining will be too expensive also
+        if( (game_mana_used + spell.mana_cost) >= best_mana_used)
+            break;
+        if(game_player.mana < spell.mana_cost)
+            break;
+            
         // Player casts spell
         game_spell_log.push_back(spell);
-        game_player.mana -= spell.mana_cost;        
+        game_player.mana -= spell.mana_cost;
+        game_mana_used += spell.mana_cost;
         if(spell.duration == 1)
             spell_effect(spell);
         else
@@ -260,7 +264,13 @@ void next_round()
         if(game_boss.hp <= 0)
         {
             game_win();
-            return;
+            // revert
+            game_spell_log = loop_top_spell_log;
+            game_player = loop_top_player;
+            game_boss = loop_top_boss;
+            game_active_spells = loop_top_active_spells;
+            game_mana_used = loop_top_mana_used;
+            continue;
         }
         // boss attacks
         int damage_to_player = (game_boss.damage - game_player.armor);
@@ -271,7 +281,13 @@ void next_round()
         {
             //game lose
             game_end_count++;
-            return;
+            // revert
+            game_spell_log = loop_top_spell_log;
+            game_player = loop_top_player;
+            game_boss = loop_top_boss;
+            game_active_spells = loop_top_active_spells;
+            game_mana_used = loop_top_mana_used;
+            continue;
         }
 
         next_round();
@@ -281,6 +297,7 @@ void next_round()
         game_player = loop_top_player;
         game_boss = loop_top_boss;
         game_active_spells = loop_top_active_spells;
+        game_mana_used = loop_top_mana_used;
     }
 }
 
@@ -290,6 +307,7 @@ pair<uint64_t,vector<Spell>> lowest_mana_win(Player player, Player boss)
     game_active_spells.clear();
     game_player = player;
     game_boss = boss;
+    game_mana_used = 0;
     best_mana_used = ~0ULL;
     best_spell_log.clear();
     game_end_count = 0;
@@ -336,9 +354,9 @@ int main()
             cout << flush;
             throw domain_error("example fails");
         }
-        auto result = lowest_mana_win(player_ex, boss_ex);
+//        auto result = lowest_mana_win(player_ex, boss_ex);
 
-//        auto result = lowest_mana_win({50,0,0,500}, {58,9,0,0});
+        auto result = lowest_mana_win({50,0,0,500}, {58,9,0,0});
         cout << "a) lowest mana win: " << result.first << "\n";
         // for(auto s : result.second)
         // {
