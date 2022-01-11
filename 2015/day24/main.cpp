@@ -44,13 +44,16 @@ void select_pkg(size_t offset)
 
 }
 
-uint64_t find_min_quant_en(vector<uint32_t> packages)
+uint64_t find_min_quant_en(vector<uint32_t> packages, int div)
 {
+    if(!div)
+        throw logic_error("div by 0");
+
     pkg_bunches.clear();
     pkg_bunch.clear();
     all_pkgs = packages;
     sort(all_pkgs.begin(), all_pkgs.end());
-    target_weight = accumulate(all_pkgs.begin(), all_pkgs.end(), 0ULL) / 3;
+    target_weight = accumulate(all_pkgs.begin(), all_pkgs.end(), 0ULL) / div;
     current_weight = 0;
     min_package_qty = ~0L;
 
@@ -87,8 +90,10 @@ int main()
             package_weight.push_back(stoul(line));
         }
 
-        auto result = find_min_quant_en(package_weight);
-        cout << "a) min quant entangle: " << result << "\n";
+        auto result = find_min_quant_en(package_weight, 3);
+        cout << "a) 3x min quant entangle: " << result << "\n";
+        result = find_min_quant_en(package_weight, 4);
+        cout << "b) 4x min quant entangle: " << result << "\n";
 
         cout << '\n';
         infile.close();

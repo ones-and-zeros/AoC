@@ -1,4 +1,5 @@
-a) min quant entangle: 10723906903
+a) 3x min quant entangle: 10723906903
+b) 4x min quant entangle: 74850409
 
-sec: 0.150601
+sec: 0.169953
 
