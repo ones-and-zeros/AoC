@@ -1,4 +1,5 @@
 a) reg b: 307
+b) init a=1 reg b: 160
 
-sec: 0.000102
+sec: 0.000347
 

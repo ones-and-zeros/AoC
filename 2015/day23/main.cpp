@@ -32,20 +32,15 @@ struct Inst{
     int32_t offset;
 };
 
-vector<uint64_t> run_prog(vector<Inst> program)
+vector<uint64_t> run_prog(vector<Inst> program, uint64_t a_init)
 {
     vector<uint64_t> reg(register_qty, {0});
+
+    reg[0] = a_init;
 
     for(size_t i = 0; i < program.size(); i++)
     {
         Inst inst = program[i];
-
-        // debug 
-        if(inst.opcode == Opcode::jio)
-        {
-            asm("nop");
-        }
-
 
         switch(inst.opcode)
         {
@@ -162,8 +157,11 @@ int main()
         //          << string(1, inst.reg) << ", os: " << inst.offset << "\n";  
         // }
 
-        auto result = run_prog(program);
+        auto result = run_prog(program, 0);
         cout << "a) reg b: " <<  result[1] << "\n";
+
+        result = run_prog(program, 1);
+        cout << "b) init a=1 reg b: " <<  result[1] << "\n";
 
         cout << '\n';
         infile.close();
