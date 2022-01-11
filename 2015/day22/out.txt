@@ -1,5 +1,5 @@
 a) lowest mana win: 1269
 b) lowest mana win hard: 1309
 
-sec: 1.802725
+sec: 1.886957
 
