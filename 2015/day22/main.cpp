@@ -79,6 +79,7 @@ Player game_boss(0,0,0,0);
 uint64_t game_end_count = 0;
 uint64_t game_win_count = 0;
 uint64_t game_mana_used = 0;
+bool game_hard = false;
 
 uint64_t best_mana_used = 0;
 vector<Spell> best_spell_log;
@@ -222,6 +223,12 @@ void game_win()
 
 void next_round()
 {
+    if(game_hard)
+    {
+        if(--game_player.hp <= 0)
+            return;
+    }
+
     /* player turn */
     spells_effect();
     if(game_boss.hp <= 0)
@@ -240,7 +247,7 @@ void next_round()
         auto it = find(game_active_spells.begin(), game_active_spells.end(), spell);
         if(game_active_spells.end() != it)
         {
-//            if(it->duration > 1)
+            if(it->duration > 1)
                 continue;
         }
 
@@ -301,7 +308,7 @@ void next_round()
     }
 }
 
-pair<uint64_t,vector<Spell>> lowest_mana_win(Player player, Player boss)
+pair<uint64_t,vector<Spell>> lowest_mana_win(Player player, Player boss, bool hard)
 {
     game_spell_log.clear();
     game_active_spells.clear();
@@ -312,6 +319,7 @@ pair<uint64_t,vector<Spell>> lowest_mana_win(Player player, Player boss)
     best_spell_log.clear();
     game_end_count = 0;
     game_win_count = 0;
+    game_hard = hard;
 
     next_round();
 
@@ -356,7 +364,7 @@ int main()
         }
 //        auto result = lowest_mana_win(player_ex, boss_ex);
 
-        auto result = lowest_mana_win({50,0,0,500}, {58,9,0,0});
+        auto result = lowest_mana_win({50,0,0,500}, {58,9,0,0}, false);
         cout << "a) lowest mana win: " << result.first << "\n";
         // for(auto s : result.second)
         // {
@@ -364,13 +372,17 @@ int main()
         // }
         // cout << "game end count: " << game_end_count << "\n";
 
-        uint64_t total = 0;
-        for(auto s : result.second)
-        {
-            cout << "  " << s.name << ",\t" << s.mana_cost << " mana\n";
-            total += s.mana_cost;
-        }
-        cout << "win " << game_win_count << " out of " << game_end_count << "\n";
+        // uint64_t total = 0;
+        // for(auto s : result.second)
+        // {
+        //     cout << "  " << s.name << ",\t" << s.mana_cost << " mana\n";
+        //     total += s.mana_cost;
+        // }
+        // cout << "win " << game_win_count << " out of " << game_end_count << "\n";
+
+
+        result = lowest_mana_win({50,0,0,500}, {58,9,0,0}, true);
+        cout << "b) lowest mana win hard: " << result.first << "\n";
 
         cout << '\n';
         infile.close();
