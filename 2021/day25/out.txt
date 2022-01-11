@@ -1,0 +1,4 @@
+ a - moves to settle: 378
+
+sec: 0.423712
+
