@@ -22,8 +22,6 @@ vector<string> opcode_txt{
 constexpr size_t register_qty{2};
 constexpr char reg_not_used{'x'};
 
-vector<uint32_t> processor_reg(register_qty, {0});
-
 struct Inst{
     Inst(Opcode opcode, char reg, int32_t offset = 0)
     : opcode{opcode}, reg{reg}, offset{offset}
@@ -33,6 +31,68 @@ struct Inst{
     char reg;
     int32_t offset;
 };
+
+vector<uint64_t> run_prog(vector<Inst> program)
+{
+    vector<uint64_t> reg(register_qty, {0});
+
+    for(size_t i = 0; i < program.size(); i++)
+    {
+        Inst inst = program[i];
+
+        // debug 
+        if(inst.opcode == Opcode::jio)
+        {
+            asm("nop");
+        }
+
+
+        switch(inst.opcode)
+        {
+            case Opcode::hlf:
+            {
+                reg[inst.reg - 'a'] >>= 1;
+                break;
+            }
+            case Opcode::tpl:
+            {
+                reg[inst.reg - 'a'] *= 3;
+                break;
+            }
+            case Opcode::inc:
+            {
+                reg[inst.reg - 'a']++;
+                break;
+            }
+            case Opcode::jmp:
+            {
+                i += inst.offset;
+                i--; // will incremnt this back in for loop
+                break;
+            }
+            case Opcode::jie:
+            {
+                if(0 == (reg[inst.reg - 'a'] & 1UL))
+                {
+                    i += inst.offset;
+                    i--; // will incremnt this back in for loop
+                }
+                break;
+            }
+            case Opcode::jio:
+            {
+                if(1 == reg[inst.reg - 'a'])
+                {
+                    i += inst.offset;
+                    i--; // will incremnt this back in for loop
+                }
+                break;
+            }
+        }
+    }
+
+    return reg;
+}
 
 int main()
 {
@@ -96,11 +156,14 @@ int main()
             }
         }
 
-        for(auto inst : program)
-        {
-            cout << opcode_txt[static_cast<size_t>(inst.opcode)] << ", reg: "
-                 << string(1, inst.reg) << ", os: " << inst.offset << "\n";  
-        }
+        // for(auto inst : program)
+        // {
+        //     cout << opcode_txt[static_cast<size_t>(inst.opcode)] << ", reg: "
+        //          << string(1, inst.reg) << ", os: " << inst.offset << "\n";  
+        // }
+
+        auto result = run_prog(program);
+        cout << "a) reg b: " <<  result[1] << "\n";
 
         cout << '\n';
         infile.close();
