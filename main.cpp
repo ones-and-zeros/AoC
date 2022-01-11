@@ -1,6 +1,9 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+// a) 1415 too high
+// a) 1362 too high
+
 struct Spell{
     string name;
     int mana_cost;
@@ -10,6 +13,16 @@ struct Spell{
     int hp_heal;
     int mana_heal;
 };
+
+bool operator==(const Spell a, const Spell b)
+{
+    return (a.name == b.name);
+}
+
+bool operator!=(const Spell a, const Spell b)
+{
+    return !(a == b);
+}
 
                         //name           cst dr dm ar hl man
 const Spell sp_m_missle {"Magic Missle", 53, 1, 4, 0, 0,   0};
@@ -38,7 +51,6 @@ struct Player{
     int mana;
 };
 
-
 void print_score(const Player player, const Player boss)
 {
     cout << "- Player has " << player.hp << " hit points, " <<
@@ -59,109 +71,235 @@ bool operator!=(const Player a, const Player b)
     return !(a==b);
 }
 
-void spell_effect(Player& player, Player& boss, vector<Spell>& spells)
-{
-    player.armor = 0;
-    size_t pos = 0;
-    while(pos < spells.size())
-    {
-        auto& spell = spells[pos];
+vector<Spell> game_active_spells;
+vector<Spell> game_spell_log;
+Player game_player(0,0,0,0);
+Player game_boss(0,0,0,0);
+uint64_t game_end_count = 0;
+uint64_t game_win_count = 0;
 
-        cout << spell.name << " effect:";
-        if(spell.damage)
-        {
-            cout << "  boss hp -" << spell.damage; 
-            boss.hp -= spell.damage;
-        }
-        if(spell.armor)
-        {
-            cout << "  arm +" << spell.armor; 
-            player.armor += spell.armor;
-        }
-        if(spell.hp_heal)
-        {
-            cout << "  hp +" << spell.hp_heal; 
-            player.hp += spell.hp_heal;
-        }
-        if(spell.mana_heal)
-        {
-            cout << "  mana +" << spell.mana_heal; 
-            player.mana += spell.mana_heal;
-        }
-        
+uint64_t best_mana_used = 0;
+vector<Spell> best_spell_log;
+
+void spell_effect(Spell spell)
+{
+    if(spell.damage)
+    {
+//        cout << "  boss hp -" << spell.damage; 
+        game_boss.hp -= spell.damage;
+    }
+    if(spell.armor)
+    {
+//        cout << "  arm +" << spell.armor; 
+        game_player.armor += spell.armor;
+    }
+    if(spell.hp_heal)
+    {
+//        cout << "  hp +" << spell.hp_heal; 
+        game_player.hp += spell.hp_heal;
+    }
+    if(spell.mana_heal)
+    {
+//        cout << "  mana +" << spell.mana_heal; 
+        game_player.mana += spell.mana_heal;
+    }    
+}
+
+void spells_effect()
+{
+    game_player.armor = 0; // reset to default before spells take effect
+    size_t pos = 0;
+    while(pos < game_active_spells.size())
+    {
+        auto& spell = game_active_spells[pos];
+//        cout << spell.name << ":";
+
+        spell_effect(game_active_spells[pos]);
+
         --spell.duration;
-        cout << "  timer " << spell.duration << "\n";
+//        cout << "  timer " << spell.duration << "\n";
         if(spell.duration == 0)
         {
-            cout << spell.name << " expires\n";
-            spells.erase(spells.begin() + pos);
+//            cout << spell.name << " expires\n";
+            game_active_spells.erase(game_active_spells.begin() + pos);
             continue; // don't increment
         }
         pos++;
     }
 }
 
+bool play_round(Spell spell)
+{
+    /* player turn */
+//    cout << "\n-- Player turn --\n";
+//    print_score(game_player, game_boss);
+    spells_effect();
+    if(game_boss.hp <= 0)
+        return false;
+    // Player casts spell
+    game_player.mana -= spell.mana_cost;
+    if(game_player.mana < 0)
+        return false;
+//    cout << "Player casts " << spell.name;
+    if(spell.duration == 1)
+    {
+//        cout << ":";
+        spell_effect(spell);
+//        cout << "\n";
+    }
+    else
+    {
+//        cout << "\n";
+        game_active_spells.push_back(spell);
+    }
+
+    /* boss turn */
+//    cout << "\n-- Boss turn --\n";
+//    print_score(game_player, game_boss);
+    spells_effect();
+    if(game_boss.hp <= 0)
+        return true;
+    // boss attacks
+    int damage_to_player = (game_boss.damage - game_player.armor);
+    if(damage_to_player < 1)
+        damage_to_player = 1;
+//    cout << "Boss attacks, damage is " << damage_to_player << "\n";
+    game_player.hp -= damage_to_player;
+    if(game_player.hp <= 0)
+        return true;
+
+    return true;
+}
+
 pair<bool, Player> play_game(Player player, Player boss, vector<Spell> spellorder)
 {
-    vector<Spell> active_spells;
+    game_active_spells.clear();
+    game_player = player;
+    game_boss = boss;
+
+//    cout << "\n\n ####### New Game ########\n";
 
     for(auto cast : spellorder)
     {
-        /* player turn */
-        cout << "\n-- Player turn --\n";
-        print_score(player, boss);
-        // spells have effect
-        spell_effect(player, boss, active_spells);
-        if(boss.hp <= 0)
-        {
-            cout << "Player wins!\n";
-            return {true, player};
-        }
-        // Player casts spell
-        player.mana -= cast.mana_cost;
-        if(player.mana < 0)
-        {
-            cout << "Player loses, out of mana\n";
-            return {false, boss}; //todo better indication ran out of mana
-        }
-        cout << "Player casts " << cast.name << "\n";
-        if(cast.duration == 1)
-        {
-            //apply now
-            vector<Spell> casted{cast};
-            spell_effect(player, boss, casted);
-        }
-        else
-            active_spells.push_back(cast);
+        if(!play_round(cast))
+            continue;
 
-        /* boss turn */
-        cout << "\n-- Boss turn --\n";
-        print_score(player, boss);
-        // spells have effect
-        spell_effect(player, boss, active_spells);
-        if(boss.hp <= 0)
+        if(game_boss.hp <= 0)
         {
-            cout << "Player wins!\n";
-            return {true, player};
+//            cout << "\nPlayer wins!\n";
+            return {true, game_player};
         }
-        // boss attacks
-        int damage_to_player = (boss.damage - player.armor);
-        if(damage_to_player < 1)
-            damage_to_player = 1;
-        cout << "Boss attacks, damage is " << damage_to_player << "\n";
-        player.hp -= damage_to_player;
-        if(player.hp <= 0)
+        if(game_player.hp <= 0)
         {
-            cout << "Player loses\n";
-            return {false, boss};
+//            cout << "\nPlayer loses\n";
+            return {false, game_boss};
+        }
+        if(game_player.mana < 0)
+        {
+//            cout << "Player loses, out of mana\n";
+            return {false, game_boss}; //todo better indication ran out of mana
         }
     }
 
     cout << flush;
     throw domain_error("ran out of spells");
-
-    return {0, {999,999,999,999}}; //error
 }
+
+
+void game_win()
+{
+    game_win_count++;
+    game_end_count++;
+
+    uint64_t mana_used = 0;
+    for(auto s : game_spell_log)
+        mana_used += s.mana_cost;
+
+    if(mana_used < best_mana_used)
+    {
+        best_spell_log = game_spell_log;
+        best_mana_used = mana_used;
+    }
+}
+
+void next_round()
+{
+    /* player turn */
+    spells_effect();
+    if(game_boss.hp <= 0)
+    {
+        game_win();
+        return;
+    }
+
+    Player loop_top_player = game_player;
+    Player loop_top_boss = game_boss;
+    vector<Spell> loop_top_spell_log = game_spell_log;
+    vector<Spell> loop_top_active_spells = game_active_spells;
+    for(auto spell : spellbook)
+    {
+        auto it = find(game_active_spells.begin(), game_active_spells.end(), spell);
+        if(game_active_spells.end() != it)
+        {
+//            if(it->duration > 1)
+                continue;
+        }
+        if(game_player.mana < spell.mana_cost)
+            continue;
+
+        // Player casts spell
+        game_spell_log.push_back(spell);
+        game_player.mana -= spell.mana_cost;        
+        if(spell.duration == 1)
+            spell_effect(spell);
+        else
+            game_active_spells.push_back(spell);
+
+        /* boss turn */
+        spells_effect();
+        if(game_boss.hp <= 0)
+        {
+            game_win();
+            return;
+        }
+        // boss attacks
+        int damage_to_player = (game_boss.damage - game_player.armor);
+        if(damage_to_player < 1)
+            damage_to_player = 1;
+        game_player.hp -= damage_to_player;
+        if(game_player.hp <= 0)
+        {
+            //game lose
+            game_end_count++;
+            return;
+        }
+
+        next_round();
+
+        // revert
+        game_spell_log = loop_top_spell_log;
+        game_player = loop_top_player;
+        game_boss = loop_top_boss;
+        game_active_spells = loop_top_active_spells;
+    }
+}
+
+pair<uint64_t,vector<Spell>> lowest_mana_win(Player player, Player boss)
+{
+    game_spell_log.clear();
+    game_active_spells.clear();
+    game_player = player;
+    game_boss = boss;
+    best_mana_used = ~0ULL;
+    best_spell_log.clear();
+    game_end_count = 0;
+    game_win_count = 0;
+
+    next_round();
+
+    return {best_mana_used, best_spell_log};
+}
+
 
 int main()
 {
@@ -187,6 +325,7 @@ int main()
             cout << flush;
             throw domain_error("example fails");
         }
+//        auto result = lowest_mana_win(player_ex, boss_ex);
 
         // example 1 - 2
         player_ex = {10, 0, 0, 250};
@@ -197,9 +336,23 @@ int main()
             cout << flush;
             throw domain_error("example fails");
         }
+        auto result = lowest_mana_win(player_ex, boss_ex);
 
+//        auto result = lowest_mana_win({50,0,0,500}, {58,9,0,0});
+        cout << "a) lowest mana win: " << result.first << "\n";
+        // for(auto s : result.second)
+        // {
+        //     cout << "  " << s.name << ",\t" << s.mana_cost << " mana\n";
+        // }
+        // cout << "game end count: " << game_end_count << "\n";
 
-
+        uint64_t total = 0;
+        for(auto s : result.second)
+        {
+            cout << "  " << s.name << ",\t" << s.mana_cost << " mana\n";
+            total += s.mana_cost;
+        }
+        cout << "win " << game_win_count << " out of " << game_end_count << "\n";
 
         cout << '\n';
         infile.close();
