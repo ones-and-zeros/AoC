@@ -42,8 +42,8 @@ There is a directory for each year, which itself contains directories for each d
 * I had a defect that needed isolated which caused sample input to pass yet the full input to fail...
 <pre><code> // simplification of defect
     uint64_t val;
-    val = 1UL << 37;  // error, UL is only 32 bits, so 1 is shifted out 
-    val = 1ULL << 37; // correct, x is valid up to value 63
+    val = 1U << 37;  // error, U is only 32 bits, so 1 is shifted out 
+    val = 1UL << 37; // correct, x is valid up to value 63
 </code></pre>
 
 ## [2021 Day 6 - Lanternfish](https://adventofcode.com/2021/day/6)
