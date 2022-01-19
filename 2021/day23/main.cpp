@@ -3,17 +3,26 @@ using namespace std;
 
 // #############
 // #01.2.3.4.56#
-// ###0#1#2#3###
-//   #A#B#C#D#
+// ###A#B#C#D###
+//   #1#1#1#1#
+//   #2#2#2#2#
+//   #3#3#3#3#
 //   #########
 
 //#define LOG_MOVES
 
+//#define SOLUTION_B
+
+#ifdef SOLUTION_B
+constexpr size_t room_depth{4};
+#else
+constexpr size_t room_depth{2};
+#endif
+
 constexpr size_t room_qty{4};
 constexpr size_t hall_length{7}; //only available spots
-constexpr size_t room_depth{2};
 constexpr size_t room_top{0};
-constexpr size_t room_bottom{1};
+constexpr size_t room_bottom{room_depth-1};
 constexpr char unoccupied{'.'};
 
 struct Board{
@@ -32,8 +41,10 @@ struct Board{
 
 // #############
 // #01.2.3.4.56#
-// ###0#1#2#3###
-//   #A#B#C#D#
+// ###A#B#C#D###
+//   #1#1#1#1#
+//   #2#2#2#2#
+//   #3#3#3#3#
 //   #########
 ostream& operator<<(ostream& os, Board& b)
 {
@@ -44,13 +55,16 @@ ostream& operator<<(ostream& os, Board& b)
     os << "." << b.hall[4];
     os << "." << b.hall[5] << b.hall[6] << "#\n";
     os << "###" << b.rooms[0][room_top];
-    os << "#" << b.rooms[1][room_top];
-    os << "#" << b.rooms[2][room_top];
-    os << "#" << b.rooms[3][room_top] << "###\n";
-    os << "  #" << b.rooms[0][room_bottom];
-    os << "#" << b.rooms[1][room_bottom];
-    os << "#" << b.rooms[2][room_bottom];
-    os << "#" << b.rooms[3][room_bottom] << "#\n";
+    os <<   "#" << b.rooms[1][room_top];
+    os <<   "#" << b.rooms[2][room_top];
+    os <<   "#" << b.rooms[3][room_top] << "###\n";
+    for(size_t i = 1; i <= room_bottom; i++)
+    {
+        os << "  #" << b.rooms[0][room_bottom] <<
+                "#" << b.rooms[1][room_bottom] <<
+                "#" << b.rooms[2][room_bottom] <<
+                "#" << b.rooms[3][room_bottom] << "#\n";
+    }
     os << "  #########\n";
 
     return os;
@@ -59,6 +73,9 @@ ostream& operator<<(ostream& os, Board& b)
 uint64_t energy = 0;
 uint64_t least_energy = ~0;
 uint64_t win_count = 0;
+vector<bool> room_avail(room_qty, false);
+vector<size_t> room_pos(room_qty, room_top);
+
 #ifdef LOG_MOVES
 vector<string> move_log;
 vector<Board> move_board;
@@ -158,14 +175,14 @@ void next_move(Board& board)
     if(is_win(board))
     {
 #ifdef LOG_MOVES
-        // cout << "win!!! " << energy << "\n";
-        // for(size_t i = 0; i < move_log.size(); i++)
-        // {
-        //     cout << move_log[i] << '\n';
-        //     cout << move_board[i];  //already \n included
-        // }
-        // cout << '\n';
-        // cout << '\n';
+        cout << "win!!! " << energy << "\n";
+        for(size_t i = 0; i < move_log.size(); i++)
+        {
+            cout << move_log[i] << '\n';
+            cout << move_board[i];  //already \n included
+        }
+        cout << '\n';
+        cout << '\n';
 #endif
 
         win_count++;
@@ -184,15 +201,9 @@ void next_move(Board& board)
 
         // find target room            
         size_t t = piece - 'A';
+
         // see if room is avail
-        size_t t_pos = 0;
-        if( board.rooms[t][room_top] != unoccupied )
-            continue;
-        else if( board.rooms[t][room_bottom] == unoccupied )
-            t_pos = room_bottom;
-        else if(board.rooms[t][room_bottom] == piece)
-            t_pos = room_top;
-        else
+        if(!room_avail[t])
             continue;
 
         // ensure it is not blocked
@@ -200,11 +211,14 @@ void next_move(Board& board)
             continue;
 
         //move h -> tr
-        board.rooms[t][t_pos] = piece;
+        board.rooms[t][room_pos[t]] = piece;
         board.hall[h] = unoccupied;
 
-        uint64_t this_energy = (room_to_hall[{t, h}].first + t_pos) * piece_energy[piece];
+        uint64_t this_energy = (room_to_hall[{t, h}].first + room_pos[t]) * piece_energy[piece];
         energy += this_energy;
+
+        // adjust target
+        room_pos[t]--;
 
 #ifdef LOG_MOVES
         move_log.push_back(string(1, piece) + " h" + to_string(h) + " -> r" + to_string(t) + ", e +" + to_string(this_energy));
@@ -213,8 +227,12 @@ void next_move(Board& board)
         next_move(board);
 
         //undo move and try next
+        // adjust target
+        room_pos[t]++;        
+        // adjust energy
         energy -= this_energy;
-        board.rooms[t][t_pos] = unoccupied;
+        // move pieces back
+        board.rooms[t][room_pos[t]] = unoccupied;
         board.hall[h] = piece;
 
 #ifdef LOG_MOVES
@@ -226,35 +244,17 @@ void next_move(Board& board)
     // can any piece in wrong room go home?
     for(size_t s = 0; s < room_qty; s++)
     {
-        size_t s_pos = 0;
-        if(board.rooms[s][room_top] != ('A' + s) &&
-           board.rooms[s][room_top] != unoccupied)
-        {
-            s_pos = room_top;
-        }
-        else if(board.rooms[s][room_top] == unoccupied &&
-                board.rooms[s][room_bottom] != unoccupied &&
-                board.rooms[s][room_bottom] != ('A' + s))
-        {
-            s_pos = room_bottom;
-        }
-        else
+        if(room_avail[s])
             continue;
 
         // identify piece;
-        char piece = board.rooms[s][s_pos];
+        char piece = board.rooms[s][room_pos[s]];
 
         // find target room            
         size_t t = piece - 'A';
+
         // see if room is avail
-        size_t t_pos = 0;
-        if( board.rooms[t][room_top] != unoccupied )
-            continue;
-        else if( board.rooms[t][room_bottom] == unoccupied )
-            t_pos = room_bottom;
-        else if(board.rooms[t][room_bottom] == piece)
-            t_pos = room_top;
-        else
+        if(!room_avail[t])
             continue;
 
         // ensure it is not blocked
@@ -262,11 +262,25 @@ void next_move(Board& board)
             continue;
 
         //move s -> tr
-        board.rooms[t][t_pos] = piece;
-        board.rooms[s][s_pos] = unoccupied;
-
-        uint64_t this_energy = (room_to_room[{s, t}].first + s_pos + t_pos) * piece_energy[piece];
+        board.rooms[t][room_pos[t]] = piece;
+        board.rooms[s][room_pos[s]] = unoccupied;
+        uint64_t this_energy = (room_to_room[{s, t}].first + room_pos[s] + room_pos[t]) * piece_energy[piece];
         energy += this_energy;
+
+        // adjust target
+        room_pos[t]--;
+        // adjust source
+        room_avail[s] = true; //consider avail, until proven otherwise
+        for(size_t p = room_pos[s] + 1; p < room_depth; p++)
+        {
+            if(board.rooms[s][p] != ('A' + s))
+            {
+                room_avail[s] = false;
+                break;
+            }
+        }
+        if(!room_avail[s])
+            room_pos[s]++;
 
 #ifdef LOG_MOVES
         move_log.push_back(string(1, piece) + " r" + to_string(s) + " -> r" + to_string(t) + ", e +" + to_string(this_energy));
@@ -276,9 +290,18 @@ void next_move(Board& board)
         next_move(board);
 
         //undo move and try next
+        // adjust target
+        room_pos[t]++;
+        // adjust source
+        if(!room_avail[s])
+            room_pos[s]--;
+        room_avail[s] = false;
+        // adjust energy
         energy -= this_energy;
-        board.rooms[t][t_pos] = unoccupied;
-        board.rooms[s][s_pos] = piece;
+        // move pieces back
+        board.rooms[t][room_pos[t]] = unoccupied;
+        board.rooms[s][room_pos[s]] = piece;
+
 
 #ifdef LOG_MOVES
         move_log.pop_back();
@@ -289,30 +312,11 @@ void next_move(Board& board)
     // can any piece move out of room?
     for(size_t s = 0; s < room_qty; s++)
     {
-        size_t s_pos = 0;
-        char home = ('A' + s);
-        if(board.rooms[s][room_bottom] != home &&
-           board.rooms[s][room_top] != unoccupied)
-        {
-            s_pos = room_top;
-        }
-        else if(board.rooms[s][room_bottom] == home &&
-                board.rooms[s][room_top] != unoccupied &&
-                board.rooms[s][room_top] != home)
-        {
-            s_pos = room_top;
-        }
-        else if(board.rooms[s][room_top] == unoccupied &&
-                board.rooms[s][room_bottom] != unoccupied &&
-                board.rooms[s][room_bottom] != home)
-        {
-            s_pos = room_bottom;
-        }
-        else
+        if(room_avail[s])
             continue;
 
         // identify piece;
-        char piece = board.rooms[s][s_pos];
+        char piece = board.rooms[s][room_pos[s]];
 
         for(size_t h = 0; h < hall_length; h++)
         {
@@ -325,10 +329,23 @@ void next_move(Board& board)
 
             //move s -> h
             board.hall[h] = piece;
-            board.rooms[s][s_pos] = unoccupied;
+            board.rooms[s][room_pos[s]] = unoccupied;
 
-            uint64_t this_energy = (room_to_hall[{s, h}].first + s_pos) * piece_energy[piece];
+            uint64_t this_energy = (room_to_hall[{s, h}].first + room_pos[s]) * piece_energy[piece];
             energy += this_energy;
+
+            // adjust source
+            room_avail[s] = true; //consider avail, until proven otherwise
+            for(size_t p = room_pos[s] + 1; p < room_depth; p++)
+            {
+                if(board.rooms[s][p] != ('A' + s))
+                {
+                    room_avail[s] = false;
+                    break;
+                }
+            }
+            if(!room_avail[s])
+                room_pos[s]++;
 
 #ifdef LOG_MOVES
             move_log.push_back(string(1, piece) + " r" + to_string(s) + " -> h" + to_string(h) + ", e +" + to_string(this_energy));
@@ -337,9 +354,15 @@ void next_move(Board& board)
             next_move(board);
 
             //undo move and try next
+            // adjust source
+            if(!room_avail[s])
+                room_pos[s]--;
+            room_avail[s] = false;
+            // adjust energy
             energy -= this_energy;
+            // move pieces back
             board.hall[h] = unoccupied;
-            board.rooms[s][s_pos] = piece;
+            board.rooms[s][room_pos[s]] = piece;
 
 #ifdef LOG_MOVES
             move_log.pop_back();
@@ -356,6 +379,9 @@ uint64_t play(vector<string> init)
     energy = 0;
     least_energy = ~0;
     win_count = 0;
+
+    for(size_t i = 0; i < room_avail.size(); i++)
+        room_avail[i] = false;
     
     next_move(board);
     
