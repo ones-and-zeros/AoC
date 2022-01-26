@@ -1,0 +1,5 @@
+     wins: 19
+ a - least power: 15299
+
+sec: 7.501207
+
