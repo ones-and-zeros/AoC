@@ -28,26 +28,21 @@ using namespace std;
 // - calculate base score, as if blocking did not matter,
 //   then use delta scores for algorithm
 //      - maybe even when going to hall, calc the whole move to final room then.
-// - combine solutions to run together
 // - simplify the step count logic ??
 // - simplify the blocking logic, traverse the string ??
 
-#define SOLUTION_B
-
-#ifdef SOLUTION_B
-constexpr size_t room_depth{4};
-#else
-constexpr size_t room_depth{2};
-#endif
 
 constexpr size_t room_qty{4};
+constexpr size_t room_depth{4};
 constexpr size_t hall_length{7}; //only available spots
 constexpr size_t board_length{hall_length + (room_qty * room_depth)};
 constexpr size_t offset_room_a{hall_length};
 constexpr size_t offset_room_b{hall_length + room_depth};
 constexpr size_t offset_room_c{hall_length + (room_depth * 2)};
 constexpr size_t offset_room_d{hall_length + (room_depth * 3)};
+
 constexpr char unoccupied{'.'};
+constexpr char filled{'X'};
 
 map<char, uint32_t> piece_energy { {'A', 1}, {'B', 10}, {'C', 100}, {'D', 1000} };
 
@@ -106,7 +101,7 @@ map<pair<size_t, size_t>, pair<int, vector<size_t>>> room_to_room{
 };
 
 struct Board{
-    Board(vector<string> init)
+    Board(vector<string> init, bool folded)
     {
         if(init.size() != room_qty)
             throw range_error("invalid room qty");
@@ -117,20 +112,35 @@ struct Board{
         char *write = &spaces[offset_room_a];
         for(size_t room = 0; room < room_qty; ++room)
         {
-            for(size_t space = 0; space < room_depth; ++space)
+            if(folded)
             {
-                *write++ = init[room][space];
+                *write++ = init[room][0];
+                *write++ = init[room][3];
+                *write++ = filled;
+                *write++ = filled;
+                continue;
             }
+            // not folded
+            for(size_t space = 0; space < room_depth; ++space)
+                *write++ = init[room][space];
         }
     }
+
     string spaces{string(board_length, '.')};
 
     bool is_win()
     {
         for(size_t room = 0; room < room_qty; ++room)
+        {
             for(size_t space = 0; space < room_depth; ++space)
-                if( ('A' + room) != spaces[offset_room_a + (room * room_depth) + space])
+            {
+                char piece = spaces[offset_room_a + (room * room_depth) + space];
+                if(filled == piece)
+                    continue;
+                if( ('A' + room) != piece)
                     return false;
+            }
+        }
         return true;
     }
 
@@ -141,6 +151,8 @@ struct Board{
 
         for(auto space = rbegin; space != rend; --space)
         {
+            if(*space == filled)
+                continue;
             if(*space == unoccupied)
                 return true;
             if(*space != 'A' + room_idx)
@@ -156,6 +168,8 @@ struct Board{
 
         for(auto space = begin; space != end; ++space)
         {
+            if(*space == filled)
+                return unoccupied;
             if(*space != unoccupied)
                 return *space;
         }
@@ -169,6 +183,8 @@ struct Board{
 
         for(auto space = begin; space != end; ++space)
         {
+            if(*space == filled)
+                return 0;
             if(*space != unoccupied)
             {
                 *space = unoccupied;
@@ -185,6 +201,8 @@ struct Board{
 
         for(auto space = rbegin; space != rend; --space)
         {
+            if(*space == filled)
+                continue;
             if(*space == unoccupied)
             {
                 *space = piece;
@@ -330,6 +348,9 @@ ostream& operator<<(ostream& os, Board& b)
     os <<   "#" << b.spaces[offset_room_d] << "###\n";
     for(size_t i = 1; i < room_depth; ++i)
     {
+        if(b.spaces[offset_room_a + i] == filled)
+            continue;
+
         os << "  #" << b.spaces[offset_room_a + i] <<
                 "#" << b.spaces[offset_room_b + i] <<
                 "#" << b.spaces[offset_room_c + i] <<
@@ -379,11 +400,11 @@ void queue_up_room_to_x(Move_queue &move_queue, Move_stat current_move)
     }
 }
 
-uint64_t play(vector<string> init)
+uint64_t play(vector<string> init, bool folded)
 {
     map<Board, uint64_t> found;
     Move_queue move_queue;
-    move_queue.push({0, Board(init)});
+    move_queue.push({0, Board(init, folded)});
     while(move_queue.size() > 0)
     {
         auto move = move_queue.top();
@@ -438,14 +459,12 @@ int main()
             }
         }
 
-        uint64_t least_energy = play(room_init);
-
-#ifdef SOLUTION_B
-        cout << " b - least power: " << least_energy << '\n';
-#else
+        uint64_t least_energy = play(room_init, true);
         cout << " a - least power: " << least_energy << '\n';
-#endif
-        cout << '\n';
+
+        least_energy = play(room_init, false);
+        cout << " b - least power: " << least_energy << '\n';
+
         infile.close();
     }
 
