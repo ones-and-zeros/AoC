@@ -12,7 +12,8 @@ using namespace std;
 // Use Dijkstra's algorithm to identify lowest score for each **board-layout**
 //
 // init
-// 1. add input board to queue with score of 0;
+// 1. calculate base-energy as if each move was direct
+// 2. add input board to queue using the base-energy just calculated
 //
 // runtime
 // 1. pop queue (lowest score in priority queue)
@@ -21,16 +22,12 @@ using namespace std;
 // 3. If seen-before AND this-energy >= seen-energy
 //      goto step 1
 // 4. identify each next-move
-// 5. add each "next-move, new-score" entry to queue
+// 5. add each "next-move, new-energy" entry to queue
+//      - keep track of delta energy against base-energy moves
+//      - only track steps when entering hall, and 
+//        account for the steps both room->hall and hall->final-room,
+//        which increases the efficiency if done together.
 // 6. repeat at step 1 until empty
-
-// potential ofi(s)
-// - calculate base score, as if blocking did not matter,
-//   then use delta scores for algorithm
-//      - maybe even when going to hall, calc the whole move to final room then.
-// - simplify the step count logic ??
-// - simplify the blocking logic, traverse the string ??
-
 
 constexpr size_t room_qty{4};
 constexpr size_t room_depth{4};
@@ -128,6 +125,46 @@ struct Board{
 
     string spaces{string(board_length, '.')};
 
+    uint32_t calc_base_energy()
+    {
+        vector<uint32_t> room_entry_base_count = {1,3,6,10};
+        uint64_t energy = 0;
+
+        for(int r = 0; r < room_qty; ++r)
+        {
+            bool is_home = true;
+
+            const char *rbegin = &spaces[offset_room_b + (r * room_depth) - 1];
+            const char *rend = rbegin - room_depth;
+
+            for(auto space = rbegin; space != rend; --space)
+            {
+                int piece = *space;
+                if(piece == filled)
+                    continue;
+                
+                // find target room            
+                size_t t = piece - 'A';
+
+                if(is_home && t == r)
+                    continue; // already home
+
+                if(is_home)
+                {
+                    is_home = false;
+                    // calculate total for incoming piece counts;
+                    energy += (room_entry_base_count[space - (rend + 1)] * piece_energy[r + 'A']);
+                }
+
+                energy += (space - rend) * piece_energy[piece];  //just enough to get out of room
+                if(t != r)
+                    energy += room_to_room[{r,t}].first * piece_energy[piece];
+            }
+        }
+
+        return energy;
+    }
+
     bool is_win()
     {
         for(size_t room = 0; room < room_qty; ++room)
@@ -176,7 +213,7 @@ struct Board{
         return unoccupied;
     }
 
-    size_t room_pop(size_t room_idx)
+    void room_pop(size_t room_idx)
     {
         char *begin = &spaces[offset_room_a + (room_idx * room_depth)];
         char *end = begin + room_depth;
@@ -184,17 +221,16 @@ struct Board{
         for(auto space = begin; space != end; ++space)
         {
             if(*space == filled)
-                return 0;
+                return;
             if(*space != unoccupied)
             {
                 *space = unoccupied;
-                return space + 1 - begin; // steps to exit
+                return;
             }
         }
-        return 0;
     }
 
-    size_t room_push(size_t room_idx, char piece)
+    void room_push(size_t room_idx, char piece)
     {
         char *rbegin = &spaces[offset_room_b + (room_idx * room_depth) - 1];
         char *rend = rbegin - room_depth;
@@ -206,10 +242,9 @@ struct Board{
             if(*space == unoccupied)
             {
                 *space = piece;
-                return space - rend; // steps to enter
+                break;
             }  
         }
-        return 0;
     }
 
     bool is_blocked_rh(size_t room_idx, size_t hall_idx) const
@@ -230,57 +265,54 @@ struct Board{
         return false;
     }
 
-    int32_t move_hall_to_room(size_t h)
+    bool move_hall_to_room(size_t h)
     {
         // identify if piece is present
         char piece = spaces[h];
         if(piece == unoccupied)
-            return 0;
+            return false;
 
         // find target room            
         size_t t = piece - 'A';
 
         // see if room is avail
         if(!is_room_avail(t))
-            return 0;
+            return false;
 
         // ensure it is not blocked
         if(is_blocked_rh(t, h))
-            return 0;
+            return false;
 
         // move
         spaces[h] = unoccupied;
-        auto step_count = room_to_hall[{t, h}].first;
-        step_count += room_push(t, piece);
-
-        return  step_count * piece_energy[piece];
+        room_push(t, piece);
+        return  true;
     }
 
-    uint32_t move_room_to_room(size_t room_src)
+    bool move_room_to_room(size_t room_src)
     {
         if(is_room_avail(room_src))
-            return 0;
+            return false;
         auto piece = room_peek(room_src);
         if(piece == unoccupied)
-            return 0;
+            return false;
 
         // find target room            
         size_t t = piece - 'A';
 
         // see if room is avail
         if(!is_room_avail(t))
-            return 0;
+            return false;
 
         // ensure it is not blocked
         if(is_blocked_rr(room_src, t))
-            return 0;
+            return false;
 
         // move
-        auto step_count = room_to_room[{room_src, t}].first;
-        step_count += room_pop(room_src);
-        step_count += room_push(t, piece);
+        room_pop(room_src);
+        room_push(t, piece);
 
-        return step_count * piece_energy[piece];
+        return true;
     }
 
     uint32_t move_room_to_hallway(size_t room_idx, size_t hall_idx)
@@ -298,9 +330,16 @@ struct Board{
             return 0;
 
         // move
-        auto step_count = room_to_hall[{room_idx, hall_idx}].first;
-        step_count += room_pop(room_idx);
+        room_pop(room_idx);
         spaces[hall_idx] = piece;
+
+        // calculate the steps that are outside of direct room->room path.
+        // also account for (the future) hall->room steps since
+        // that value will be a constant and if factored now it
+        // improves efficiency
+        auto step_count = room_to_hall[{room_idx, hall_idx}].first;
+        step_count += room_to_hall[{piece - 'A', hall_idx}].first;
+        step_count -= room_to_room[{room_idx, piece - 'A'}].first;
 
         return step_count * piece_energy[piece];
     }
@@ -367,9 +406,8 @@ void queue_up_hallway_to_room(Move_queue &move_queue, Move_stat current_move)
     for(size_t h = 0; h < hall_length; ++h)
     {
         Board board = current_move.board;
-        auto energy_used = board.move_hall_to_room(h);
-        if(energy_used)
-            move_queue.push({energy_used + current_move.energy, board});
+        if(board.move_hall_to_room(h))
+            move_queue.push({current_move.energy, board});
     }
 }
 
@@ -380,10 +418,9 @@ void queue_up_room_to_x(Move_queue &move_queue, Move_stat current_move)
         Board board = current_move.board;
 
         // can any piece in wrong room go home?
-        auto energy_used = board.move_room_to_room(r);
-        if(energy_used)
+        if(board.move_room_to_room(r))
         {
-            move_queue.push({energy_used + current_move.energy, board});
+            move_queue.push({current_move.energy, board});
             continue;
         }
         // ...if not...
@@ -404,7 +441,8 @@ uint64_t play(vector<string> init, bool folded)
 {
     map<Board, uint64_t> found;
     Move_queue move_queue;
-    move_queue.push({0, Board(init, folded)});
+    Board board = Board(init, folded);
+    move_queue.push({board.calc_base_energy(), board});
     while(move_queue.size() > 0)
     {
         auto move = move_queue.top();

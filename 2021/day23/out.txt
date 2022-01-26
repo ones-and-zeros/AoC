@@ -1,4 +1,4 @@
  a - least power: 15299
  b - least power: 47193
-sec: 4.848137
+sec: 0.396982
 
