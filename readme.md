@@ -2,7 +2,7 @@
 Collection of my solutions for the [Advent of Code](https://adventofcode.com) series.
 
 ## My Path
-I discovered the **Advent of Code** in December 2021 and decided to give the puzzles a try.  I used c++ and found it  refreshing to work on small projects with no dependencies outside of the standard library.  I was able to progress through the first two weeks of 2021 rather efficiently and had a love/hate relationship with the challenges within the last week.  I was almost able to complete all of 2021, as day 23 part 2 is all that remains incomplete, which I plan to revisit soon.  After *nearly* completing 2021, I decided to explore 2015, the first year, and was able to **complete 100% of 2015**.  I have found this exercise very enjoyable and I look forward to exploring more years to come.  
+I discovered the **Advent of Code** in December 2021 and decided to give the puzzles a try.  I used c++ and found it  refreshing to work on small projects with no dependencies outside of the standard library.  I was able to progress through the first two weeks of 2021 rather efficiently and had a love/hate relationship with the challenges within the last week.  I was almost able to **complete all of 2021**, although I had to come back at a later time for Day 23 part 2.  I also decided to explore 2015, the first year, and was able to **complete 100% of 2015** also.  I have found this exercise very enjoyable and I look forward to exploring more years to come.  
 
 ## Goals
 * **have fun**
@@ -30,10 +30,17 @@ There is a directory for each year, which itself contains directories for each d
 # Days worth mentioning
 ## [2021 Day 23 - Amphipod](https://adventofcode.com/2021/day/23)
 **objective**: move pieces from rooms into a sorted order with minimal points, different pieces cause more points to move.
-* only remaining unsolved part of 2021
+* completed as of 1/26/22! ~~only remaining unsolved part of 2021~~
 * completed part 1 with brute force
 * part 2 added more depth and pieces, so brute force is no longer feasible as execution time would exceed weeks
-* a proper solution seems to be related to [Dijkstra’s algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm), yet I need to understand how to factor in the blocking of pieces\paths when moved
+* I used [Dijkstra’s algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm).  Every new board layout is considered node!!!  I was hung up for awhile trying to use each individual piece as a node.  Once this made sense to me, it was rather straightforward to implement.
+* originally part 2 solution was 8s with the basic algorithm.
+* improved to 400mS for both part 1 and part 2 running consecutive.
+
+Biggest time gains were
+* simplify the Board class to just a single string as a member.  Especially helpful since it is used for key lookup.
+* Initially calculate the base-energy, which is the energy used if each piece could go straight home.  Then only track delta-energy against this direct path.
+* only add delta-energy when **entering hall**, and account for both the steps for room->hall and for  hall->final-room, since they are constant and both will be implemented for this intermediate position.
 
 ## [2021 Day 19 - Beacon Scanner](https://adventofcode.com/2021/day/19)
 **objective**: align various scanner/beacons within a 3D space.  Each scanner can have it's orientation out of alignment in 90 degrees per axis, which yields 24 unique orientations.  Using the various unaligned scanner reports you need to find the overlapping beacons and map them all to an absolute origin (scanner 1).
