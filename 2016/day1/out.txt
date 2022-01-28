@@ -1,0 +1,2 @@
+timer "file"	 sec: 0.000022
+timer "main"	 sec: 0.000129
