@@ -1,4 +1,4 @@
-timer "parse input"	 sec: 0.000021
-timer "find-code"	 sec: 0.000058
+timer "parse input"	 sec: 0.000019
+timer "find-code"	 sec: 0.000059
 part 1 - code: 84452
-timer "main"	 sec: 0.000159
+timer "main"	 sec: 0.000137
