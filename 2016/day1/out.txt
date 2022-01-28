@@ -1,2 +1,8 @@
-timer "file"	 sec: 0.000022
-timer "main"	 sec: 0.000129
+timer "parse in"	 sec: 0.000219
+timer "path calc"	 sec: 0.000010
+part1 - shortest path: 271
+
+timer "path first double calc"	 sec: 0.001301
+part2 - shortest path first double: 153
+
+timer "main"	 sec: 0.001687
