@@ -17,6 +17,29 @@ public:
     {
         return stol(sector_id_);
     }
+    string name() const
+    {
+        return name_;
+    }
+    string decoded_name() const
+    {
+        size_t offset = sector_id_val() % 26;
+
+        string result;
+        for(auto c : name_)
+        {
+            if(c == '-')
+            {
+                result += ' ';
+                continue;
+            }
+            if(c + offset <= 'z')
+                result += c + offset;
+            else
+                result += c - (26 - offset);
+        }
+        return result;
+    }
 private:
     struct Letter_count{
         Letter_count(char letter, int32_t count)
@@ -42,23 +65,17 @@ private:
         for(auto c : name_)
         {
             if(isalpha(c))
-            {
                 letters[c - 'a']++;
-            }
         }
 
         vector<Letter_count> letter_count;
         for(char letter = 'a'; letter <= 'z'; letter++)
-        {
             letter_count.push_back({letter, letters[letter - 'a']});
-        }
         partial_sort(letter_count.begin(), letter_count.begin() + 5, letter_count.end());
         
         string result;
         for(size_t pos = 0; pos < 5; pos++)
-        {
             result += letter_count[pos].letter_;
-        }
 
         return result;
     }
@@ -70,19 +87,29 @@ private:
 using Rooms = vector<Room>;
 
 
-int32_t valid_room_sum(Rooms rooms)
+int32_t valid_room_sum(const Rooms &rooms)
 {
     Timer t{"valid_room_sum"};
     int32_t tally = 0;
 
-    for(auto r : rooms)
-    {
+    for(auto &r : rooms)
         if(r.is_valid())
-        {
             tally += r.sector_id_val();
-        }
-    }
+
     return tally;
+}
+
+int32_t northpole_object_storage_vector_id(const Rooms &rooms)
+{
+    Timer t{"decoded_names"};
+
+    vector<string> result;
+
+    for(auto &r : rooms)
+        if(r.is_valid())
+            if("northpole object storage" == r.decoded_name())
+                return r.sector_id_val();
+    return -1;
 }
 
 int main()
@@ -105,19 +132,13 @@ int main()
 
             size_t pos = 0;
             while(!isdigit(line[pos + 1]))
-            {
                 name += line[pos++];
-            }
             pos++;
             while(line[pos] != '[')
-            {
                 vector_id += line[pos++];
-            }
             pos++;
             while(line[pos] != ']')
-            {
                 checksum += line[pos++];
-            }
             rooms.push_back({name, vector_id, checksum});
         }
 
@@ -131,9 +152,7 @@ int main()
     cout << "part 1 - valid room sum: " << result << "\n";
     cout << "\n";
 
-    // for(auto r : rooms)
-    // {
-    //     cout << r.name_ << "-" << stol(r.sector_id_) << "[" << r.checksum_ << "]\n";
-    // }
-
+    result = northpole_object_storage_vector_id(rooms);
+    cout << "part 2 - decoded names: " << result << "\n";
+    cout << "\n";
 }

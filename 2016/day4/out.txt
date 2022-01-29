@@ -1,6 +1,9 @@
-timer "parse input"	 sec: 0.001012
+timer "parse input"	 sec: 0.001142
 
-timer "valid_room_sum"	 sec: 0.006501
+timer "valid_room_sum"	 sec: 0.006377
 part 1 - valid room sum: 409147
 
-timer "main"	 sec: 0.007786
+timer "decoded_names"	 sec: 0.005673
+part 2 - decoded names: 991
+
+timer "main"	 sec: 0.013432
