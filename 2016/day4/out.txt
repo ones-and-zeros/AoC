@@ -1,3 +1,6 @@
-timer "parse input"	 sec: 0.000012
+timer "parse input"	 sec: 0.001045
 
-timer "main"	 sec: 0.000079
+timer "valid_room_sum"	 sec: 0.006290
+part 1 - valid room sum: 409147
+
+timer "main"	 sec: 0.007616
