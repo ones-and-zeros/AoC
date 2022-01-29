@@ -1,6 +1,9 @@
-timer "parse input"	 sec: 0.000862
+timer "parse input"	 sec: 0.002176
 
-timer "triangle count"	 sec: 0.000175
+timer "triangle count"	 sec: 0.000255
 part 1 - triangle count: 862
 
-timer "main"	 sec: 0.001103
+timer "triangle count"	 sec: 0.000220
+part 2 - triangle count vert: 1577
+
+timer "main"	 sec: 0.002776

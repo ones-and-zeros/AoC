@@ -32,22 +32,37 @@ int main()
     Timer t_main("main");
 
     Triangles potential_triangles;
+    Triangles potential_triangles_vert;
 
     ifstream infile("input.txt");
     if(infile.is_open())
     {
         Timer t_p("parse input");
 
+        array<Triangle,3> tri_parse;
+        size_t side = 0;
+
         string line;
         while(getline(infile, line))
         {
             istringstream iss{line};
-            int a, b, c;
-            iss >> a;
-            iss >> b;
-            iss >> c;
-            potential_triangles.push_back({a, b, c});
+            int x, y, z;
+            iss >> x;
+            iss >> y;
+            iss >> z;
+            potential_triangles.push_back({x, y, z});
+
+            tri_parse[0][side] = x;
+            tri_parse[1][side] = y;
+            tri_parse[2][side] = z;
+            ++side;
+            if(side == 3)
+            {
+                side = 0;
+                for_each(tri_parse.begin(), tri_parse.end(), [&potential_triangles_vert](Triangle t){potential_triangles_vert.push_back(t);});
+            }
         }
+
         infile.close();
     }
     else
@@ -56,5 +71,9 @@ int main()
 
     auto triangle_qty = triangle_count(potential_triangles);
     cout << "part 1 - triangle count: " << triangle_qty << "\n";
+    cout << "\n";
+
+    triangle_qty = triangle_count(potential_triangles_vert);
+    cout << "part 2 - triangle count vert: " << triangle_qty << "\n";
     cout << "\n";
 }
