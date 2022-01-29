@@ -1,0 +1,2 @@
+timer "parse input"	 sec: 0.000001
+timer "main"	 sec: 0.000062
