@@ -23,50 +23,58 @@ bool is_abba(const string & s)
 }
 
 struct Ip_address{
-    string address;
-    bool is_ip_valid()
+public:
+    Ip_address(string address)
+    : addr{address}
     {
-        vector<string> standard;
-        vector<string> hypernet;
-
         string temp;
         for(auto c : address)
         {
             if(c == '[')
             {
-                standard.push_back(temp);
+                if(temp.size())
+                    supernets.push_back(temp);
                 temp.clear();
                 continue;
             }
             if(c == ']')
             {
-                hypernet.push_back(temp);
+                if(temp.size())
+                    hypernets.push_back(temp);
                 temp.clear();
                 continue;
             }
             temp += c;
         }
-        standard.push_back(temp);
+        if(temp.size())
+            supernets.push_back(temp);
+    }
 
-        if( any_of(hypernet.begin(), hypernet.end(), is_abba) )
+    bool supports_tls()
+    {
+        if( any_of(hypernets.begin(), hypernets.end(), is_abba) )
             return false;
-        if( any_of(standard.begin(), standard.end(), is_abba) )
+        if( any_of(supernets.begin(), supernets.end(), is_abba) )
             return true;
         return false;
     }
+private:
+    string addr;
+    vector<string> supernets;
+    vector<string> hypernets;
 };
 
 using Ip_addresses = vector<Ip_address>;
 
 
-uint32_t ip_valid_count(Ip_addresses ip_addresses)
+uint32_t ip_supports_tls_count(Ip_addresses ip_addresses)
 {
-    Timer t{"ip_valid_count"};
+    Timer t{"ip_supports_tls_count"};
 
     uint32_t tally = 0;
 
     for(auto ip : ip_addresses)
-        if(ip.is_ip_valid())
+        if(ip.supports_tls())
             tally++;
 
     return tally;
@@ -95,8 +103,8 @@ int main()
         throw logic_error("unable to open input file");
     cout << "\n";
 
-    auto result = ip_valid_count(ip_addresses);
-    cout << "part 1 - valid ip count: " << result << "\n";
+    auto result = ip_supports_tls_count(ip_addresses);
+    cout << "part 1 - TLS support count: " << result << "\n";
     cout << endl;
 
 }
