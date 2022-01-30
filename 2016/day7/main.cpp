@@ -58,6 +58,28 @@ public:
             return true;
         return false;
     }
+
+    bool supports_ssl()
+    {
+        for(auto & s : supernets)
+        {
+            size_t pos_last = s.size() - 3;
+            for(size_t pos = 0; pos <= pos_last; ++pos)
+            {
+                if( (s[pos]     == s[pos + 2]) &&
+                    (s[pos]     != s[pos + 1]) )
+                {
+                    // aba found in supernet
+                    // look for bab in hypernet
+                    string to_find(string(1,s[pos + 1]) + string(1,s[pos]) + string(1,s[pos + 1]));
+                    if(any_of(hypernets.begin(), hypernets.end(), [&to_find](string s){ return (s.size() > s.find(to_find));}))
+                        return true;
+                }
+            }
+        }
+
+        return false;
+    }
 private:
     string addr;
     vector<string> supernets;
@@ -65,7 +87,6 @@ private:
 };
 
 using Ip_addresses = vector<Ip_address>;
-
 
 uint32_t ip_supports_tls_count(Ip_addresses ip_addresses)
 {
@@ -75,6 +96,19 @@ uint32_t ip_supports_tls_count(Ip_addresses ip_addresses)
 
     for(auto ip : ip_addresses)
         if(ip.supports_tls())
+            tally++;
+
+    return tally;
+}
+
+uint32_t ip_supports_ssl_count(Ip_addresses ip_addresses)
+{
+    Timer t{"ip_supports_ssl_count"};
+
+    uint32_t tally = 0;
+
+    for(auto ip : ip_addresses)
+        if(ip.supports_ssl())
             tally++;
 
     return tally;
@@ -104,7 +138,10 @@ int main()
     cout << "\n";
 
     auto result = ip_supports_tls_count(ip_addresses);
-    cout << "part 1 - TLS support count: " << result << "\n";
+    cout << "part 1 - support TLS count: " << result << "\n";
     cout << endl;
 
+    result = ip_supports_ssl_count(ip_addresses);
+    cout << "part 2 - support SSL count: " << result << "\n";
+    cout << endl;
 }

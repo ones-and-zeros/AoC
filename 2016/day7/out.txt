@@ -1,6 +1,9 @@
-timer "parse input"	 sec: 0.005775
+timer "parse input"	 sec: 0.006381
 
-timer "ip_supports_tls_count"	 sec: 0.002216
-part 1 - TLS support count: 115
+timer "ip_supports_tls_count"	 sec: 0.002347
+part 1 - support TLS count: 115
 
-timer "main"	 sec: 0.010242
+timer "ip_supports_ssl_count"	 sec: 0.002995
+part 2 - support SSL count: 231
+
+timer "main"	 sec: 0.015595
