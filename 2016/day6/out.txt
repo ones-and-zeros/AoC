@@ -1,6 +1,9 @@
-timer "parse input"	 sec: 0.000088
+timer "parse input"	 sec: 0.000092
 
-timer "recover"	 sec: 0.000063
+timer "recover"	 sec: 0.000068
 part 1 - recovered: qrqlznrl
 
-timer "main"	 sec: 0.000230
+timer "recover"	 sec: 0.000071
+part 2 - recovered with min: kgzdfaon
+
+timer "main"	 sec: 0.000327

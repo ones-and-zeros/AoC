@@ -5,7 +5,7 @@ using namespace std;
 
 using Messages = vector<string>;
 
-string recover(Messages messages)
+string recover(Messages messages, bool use_min)
 {
     Timer t_main("recover");
     
@@ -16,21 +16,16 @@ string recover(Messages messages)
 
     for(size_t pos = 0; pos < messages[0].size(); ++pos)
     {
-        array<uint32_t, 26> letter_count{0};
+        array<uint32_t, 26> letter_count;
+        letter_count.fill(use_min ? ~0 : 0);
+        
         for(auto & m : messages)
             ++letter_count[m[pos] - 'a'];
 
-        uint32_t max_val = 0;
-        char letter = '?';
-        for(size_t lpos = 0; lpos < 26; ++lpos)
-        {
-            if(letter_count[lpos] > max_val)
-            {
-                max_val = letter_count[lpos];
-                letter = 'a' + lpos;
-            }
-        }
-        result += letter;
+        if(use_min)
+            result += 'a' + (min_element(letter_count.begin(),letter_count.end()) - letter_count.begin());
+        else
+            result += 'a' + (max_element(letter_count.begin(),letter_count.end()) - letter_count.begin());
     }
 
     return result;
@@ -60,7 +55,11 @@ int main()
         throw logic_error("unable to open input file");
     cout << "\n";
 
-    auto result = recover(messages);
+    auto result = recover(messages, false);
     cout << "part 1 - recovered: " << result << "\n";
+    cout << "\n";
+
+    result = recover(messages, true);
+    cout << "part 2 - recovered with min: " << result << "\n";
     cout << "\n";
 }
