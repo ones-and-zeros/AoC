@@ -1,3 +1,9 @@
-timer "parse input"	 sec: 0.000086
+timer "parse input"	 sec: 0.000018
 
-timer "main"	 sec: 0.000160
+timer "password"	 sec: 22.356393
+part 1 - password: f97c354d
+
+timer "better password"	 sec: 77.750064
+part 2 - better: 863dde27
+
+timer "main"	 sec: 100.106694
