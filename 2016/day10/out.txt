@@ -1,0 +1,9 @@
+timer "parse input"	 sec: 0.000148
+
+timer "bot_id_that_compares_values"	 sec: 0.001924
+part 1 - bot id that compares 61 and 17: 161
+
+timer "mult_outputs"	 sec: 0.001876
+part 2 - mult an output value from each output 0, 1, 2: 133163
+
+timer "main"	 sec: 0.004142
