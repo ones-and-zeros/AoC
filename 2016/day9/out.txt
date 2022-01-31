@@ -1,3 +1,9 @@
-timer "parse input"	 sec: 0.000017
+timer "parse input"	 sec: 0.000043
 
-timer "main"	 sec: 0.000075
+timer "decompressed_length"	 sec: 0.000201
+part 1 - decompressed length: 97714
+
+timer "decompressed_length"	 sec: 0.001900
+part 2 - decompressed length full: 10762972461
+
+timer "main"	 sec: 0.002218
