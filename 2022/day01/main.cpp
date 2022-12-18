@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <numeric>
+#include <algorithm>
 
 #include "timer.h"
 
@@ -37,8 +38,6 @@ int main()
 
       // calories
       food_items.push_back(std::stoi(calories_s));
-
-      // todo
     }
 
     infile.close();
@@ -57,28 +56,23 @@ int main()
   //   }
   // }
  
-  struct Elf {
-    std::size_t id;
-    int total_calories;
-  };
-
-  Elf elf_with_max_calories{0,0};
+  std::vector<int> calories;
+  int calories_top_elf;
+  int calories_top_3_elves;
 
   {
     Timer t_main("calc");
- 
+  
     for (std::size_t idx = 0; idx < elves_inventory.size(); idx++) {
       const auto& inventory = elves_inventory[idx];
-      auto total_calories = std::accumulate(inventory.begin(), inventory.end(), 0); 
-      if(total_calories > elf_with_max_calories.total_calories) {
-        elf_with_max_calories.id = idx + 1;
-        elf_with_max_calories.total_calories = total_calories;
-      }
+      calories.push_back(std::accumulate(inventory.begin(), inventory.end(), 0));
     }
+
+    std::sort(calories.begin(), calories.end(), std::greater<int>());
+    calories_top_elf = calories[0];
+    calories_top_3_elves = std::accumulate(calories.begin(), calories.begin() + 3, 0);
   }
 
-  std::cout << "Elf most calories: Elf " << elf_with_max_calories.id <<
-               ", with " << elf_with_max_calories.total_calories << " total calories.\n";
-
-
+  std::cout << "part-1) Top calories for 1 elf: " << calories_top_elf << "\n";
+  std::cout << "part-2) Top calories for 3 elves: " << calories_top_3_elves << "\n";
 }
