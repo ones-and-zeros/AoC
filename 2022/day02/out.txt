@@ -1,4 +1,7 @@
-timer "parse input"	 sec: 0.000011
+timer "parse input"	 sec: 0.001220
 
-timer "calc"	 sec: 0.000001
-timer "main"	 sec: 0.000061
+timer "calc"	 sec: 0.001839
+
+part 1) total score: 8890
+
+timer "main"	 sec: 0.003147
