@@ -87,15 +87,46 @@ std::uint8_t PlayMatch(Match match) {
   return hand_value[match.me] + outcome_value[match_result_table[match]];
 }
 
-std::map<char, Hand> strategy_guide_decypher {
+std::map<char, Hand> decypher_other {
   {'A', Hand::Rock},
   {'B', Hand::Paper},
   {'C', Hand::Scissors},
+};
+
+std::map<char, Hand> decypher_me_p1 {
   {'X', Hand::Rock},
   {'Y', Hand::Paper},
   {'Z', Hand::Scissors},
 };
 
+Match DecypherPart1(Move move) {
+  return {decypher_me_p1[move.second], decypher_other[move.first]};
+}
+
+std::map<std::pair<Hand,Outcome>, Hand> match_outcome_table {
+  {{Hand::Rock, Outcome::Draw}, Hand::Rock},        
+  {{Hand::Rock, Outcome::Lose}, Hand::Scissors},       
+  {{Hand::Rock, Outcome::Win}, Hand::Paper},    
+  {{Hand::Paper, Outcome::Win}, Hand::Scissors},       
+  {{Hand::Paper, Outcome::Draw}, Hand::Paper},     
+  {{Hand::Paper, Outcome::Lose}, Hand::Rock},   
+  {{Hand::Scissors, Outcome::Lose}, Hand::Paper},    
+  {{Hand::Scissors, Outcome::Win}, Hand::Rock},   
+  {{Hand::Scissors, Outcome::Draw}, Hand::Scissors},
+};
+
+std::map<char, Outcome> intended_outcome_p2 {
+  {'X', Outcome::Lose},
+  {'Y', Outcome::Draw},
+  {'Z', Outcome::Win},
+};
+
+Match DecypherPart2(Move move) {
+  const Hand other_hand = decypher_other[move.first];
+  const auto intended_outcome = intended_outcome_p2[move.second];
+  const auto my_hand = match_outcome_table[{other_hand,intended_outcome}];
+  return {my_hand, other_hand};
+}
 
 int main()
 {
@@ -123,25 +154,20 @@ int main()
   //   std::cout << move.first << " " << move.second << "\n";
   // }
 
-  std::uint64_t total_score = 0;
+  std::uint64_t total_score_p1 = 0;
+  std::uint64_t total_score_p2 = 0;
 
   {
     Timer t_main("calc");
 
     for (const auto& move : strategy_guide) {
-      const std::uint32_t score = PlayMatch(
-        Match{strategy_guide_decypher[move.second],
-              strategy_guide_decypher[move.first]});
-
-//      std::cout << score << "\n";
-
-      total_score += score;
+      total_score_p1 += PlayMatch(DecypherPart1(move));
+      total_score_p2 += PlayMatch(DecypherPart2(move));
     }
-
   }
 
   std::cout << "\n";
-  std::cout << "part 1) total score: " << total_score << "\n";
-  //std::cout << "part 2) Y: " << todo << "\n";
+  std::cout << "part 1) total score: " << total_score_p1 << "\n";
+  std::cout << "part 2) total score: " << total_score_p2 << "\n";
   std::cout << "\n";
 }
