@@ -1,3 +1,5 @@
-timer "parse input"	 sec: 0.000044
+timer "parse input"	 sec: 0.003085
 
-timer "main"	 sec: 0.000152
+timer "calc"	 sec: 0.000061
+Elf most calories: Elf 7, with 67633 total calories.
+timer "main"	 sec: 0.003278
