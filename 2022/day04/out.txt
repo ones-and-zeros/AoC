@@ -1,0 +1,8 @@
+timer "parse input"	 sec: 0.001375
+
+timer "calc"	 sec: 0.000083
+
+part 1) contained: 477
+part 2) overlaped: 830
+
+timer "main"	 sec: 0.001579
