@@ -5,7 +5,7 @@ Collection of my solutions for the [Advent of Code](https://adventofcode.com) se
 I discovered the **Advent of Code** in December 2021 and decided to give the puzzles a try.  I used c++ and found it  refreshing to work on small projects with no dependencies outside of the standard library.  I was able to progress through the first two weeks of 2021 rather efficiently and had a love/hate relationship with the challenges within the last week.  I was able to **complete 100% of 2021**, although I had to come back at a later time for Day 23 part 2.  I also decided to explore 2015, the first year, and was able to **complete 100% of 2015** also.  I have found this exercise very enjoyable and I look forward to exploring more years to come.  
 
 ## Current Progress
-* 2022 = 12 stars
+* 2022 = 14 stars
 * 2021 = 50 stars (complete)
 * 2016 = 20 stars 
 * 2015 = 50 stars (complete)

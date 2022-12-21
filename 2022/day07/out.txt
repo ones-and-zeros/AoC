@@ -1,0 +1,11 @@
+timer "parse input"	 sec: 0.001830
+
+          used: 42036703
+currently free: 27963297
+  need to free: 2036703
+timer "calc"	 sec: 0.000510
+
+part 1) : 1325919
+part 2) : 2050735
+
+timer "main"	 sec: 0.002492
