@@ -1,0 +1,8 @@
+timer "parse input"	 sec: 0.000052
+
+timer "calc"	 sec: 0.002455
+
+part 1) : 1538
+part 2) : 496125
+
+timer "main"	 sec: 0.002568
