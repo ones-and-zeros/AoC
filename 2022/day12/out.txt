@@ -1,0 +1,389 @@
+timer "parse input"	 sec: 0.000036
+
+abcccccccaaaaaccccaaaaaaaccccccccccccccccccccccccccccccccccccaaaaa
+abaacccaaaaaaccccccaaaaaaaaaaaaaccccccccccccccccccccccccccccaaaaaa
+abaacccaaaaaaaccccaaaaaaaaaaaaaacccccccccccccaacccccccccccccaaaaaa
+abaacccccaaaaaacaaaaaaaaaaaaaaaacccccccccccccaacccccccccccccacacaa
+abaccccccaaccaacaaaaaaaaaacccaacccccccccccccaaacccccccccccccccccaa
+abcccccccaaaacccaaaaaaaaacccccccccccccaaacccaaacccccccccccccccccaa
+abccccccccaaaccccccccaaaacccccccccccccaaaaacaaaccacacccccccccccccc
+abccccccccaaacaaacccccaaacccccccccccccaaaaaaajjjjjkkkcccccaacccccc
+abcccccaaaaaaaaaacccccaaccccccccccciiiiiijjjjjjjjjkkkcaaaaaacccccc
+abcccccaaaaaaaaacccccccccccccccccciiiiiiijjjjjjjrrkkkkaaaaaaaacccc
+abcccccccaaaaaccccccccccccccccccciiiiiiiijjjjrrrrrppkkkaaaaaaacccc
+abcccaaccaaaaaacccccccccccaacaaciiiiqqqqqrrrrrrrrpppkkkaaaaaaacccc
+abccaaaaaaaaaaaaccccacccccaaaaaciiiqqqqqqrrrrrruuppppkkaaaaacccccc
+abcccaaaaaaacaaaacaaacccccaaaaaahiiqqqqtttrrruuuuupppkkaaaaacccccc
+abcaaaaaaaccccaaaaaaacccccaaaaaahhqqqtttttuuuuuuuuuppkkkccaacccccc
+abcaaaaaaaaccccaaaaaacccccaaaaaahhqqqtttttuuuuxxuuuppkklcccccccccc
+abcaaaaaaaacaaaaaaaaaaacccccaaachhhqqtttxxxuuxxyyuuppllllccccccccc
+abcccaaacaccaaaaaaaaaaaccccccccchhhqqtttxxxxxxxyuupppplllccccccccc
+abaacaacccccaaaaaaaaaaaccccccccchhhqqtttxxxxxxyyvvvpppplllcccccccc
+abaacccccccccaaaaaaacccccccccccchhhpppttxxxxxyyyvvvvpqqqlllccccccc
+SbaaccccccaaaaaaaaaaccccccccccchhhppptttxxxEzzyyyyvvvqqqlllccccccc
+abaaaaccccaaaaaaaaacccccccccccchhhpppsssxxxyyyyyyyyvvvqqqlllcccccc
+abaaaacccccaaaaaaaacccccccccccgggpppsssxxyyyyyyyyyvvvvqqqlllcccccc
+abaaacccaaaacaaaaaaaccccccccccgggpppsswwwwwwyyyvvvvvvqqqllllcccccc
+abaaccccaaaacaaccaaaacccccccccgggppssswwwwwwyyywvvvvqqqqmmmccccccc
+abaaccccaaaacaaccaaaaccaaaccccggpppssssswwswwyywvqqqqqqmmmmccccccc
+abcccccccaaacccccaaacccaaacaccgggpppssssssswwwwwwrqqmmmmmccccccccc
+abcccccccccccccccccccaacaaaaacgggppooosssssrwwwwrrrmmmmmcccccccccc
+abcccccccccccccccccccaaaaaaaacggggoooooooorrrwwwrrnmmmdddccaaccccc
+abaccccccccccccaacccccaaaaaccccggggoooooooorrrrrrrnmmddddcaaaccccc
+abaccccccccaaaaaaccccccaaaaaccccggfffffooooorrrrrnnndddddaaaaccccc
+abaacccccccaaaaaacccccaaaaaacccccffffffffoonrrrrrnnndddaaaaaaacccc
+abaaccccccccaaaaaaaccacaaaacccccccccffffffonnnnnnnndddaaaaaaaacccc
+abccccccccccaaaaaaaaaaaaaaaccccccccccccfffennnnnnnddddccaaaccccccc
+abcccccccccaaaaaaacaaaaaaaaaacccccccccccffeennnnnedddccccaaccccccc
+abcccccccccaaaaaaccaaaaaaaaaaaccccccccccaeeeeeeeeeedcccccccccccccc
+abccccccccccccaaaccaaaaaaaaaaaccccccccccaaaeeeeeeeecccccccccccccaa
+abcccccccaaccccccccaaaaaaaacccccccccccccaaaceeeeecccccccccccccccaa
+abaaccaaaaaaccccccccaaaaaaaacccccccccccccaccccaaacccccccccccaaacaa
+abaaccaaaaacccccaaaaaaaaaaacccccccccccccccccccccacccccccccccaaaaaa
+abaccaaaaaaaaccaaaaaaaaaaaaaacccccccccccccccccccccccccccccccaaaaaa
+
+ found steps 1019
+ found steps 1015
+ found steps 1013
+ found steps 1011
+ found steps 1009
+ found steps 1007
+ found steps 1005
+ found steps 1003
+ found steps 1001
+ found steps 999
+ found steps 997
+ found steps 995
+ found steps 993
+ found steps 991
+ found steps 989
+ found steps 987
+ found steps 985
+ found steps 983
+ found steps 981
+ found steps 979
+ found steps 977
+ found steps 975
+ found steps 973
+ found steps 971
+ found steps 969
+ found steps 967
+ found steps 965
+ found steps 963
+ found steps 961
+ found steps 959
+ found steps 957
+ found steps 955
+ found steps 953
+ found steps 951
+ found steps 949
+ found steps 947
+ found steps 945
+ found steps 943
+ found steps 941
+ found steps 939
+ found steps 937
+ found steps 935
+ found steps 933
+ found steps 931
+ found steps 929
+ found steps 927
+ found steps 925
+ found steps 923
+ found steps 921
+ found steps 919
+ found steps 917
+ found steps 915
+ found steps 913
+ found steps 911
+ found steps 909
+ found steps 907
+ found steps 905
+ found steps 903
+ found steps 901
+ found steps 899
+ found steps 897
+ found steps 895
+ found steps 893
+ found steps 891
+ found steps 889
+ found steps 887
+ found steps 885
+ found steps 883
+ found steps 881
+ found steps 879
+ found steps 877
+ found steps 875
+ found steps 873
+ found steps 871
+ found steps 869
+ found steps 867
+ found steps 865
+ found steps 863
+ found steps 861
+ found steps 859
+ found steps 857
+ found steps 855
+ found steps 853
+ found steps 851
+ found steps 849
+ found steps 847
+ found steps 845
+ found steps 843
+ found steps 841
+ found steps 839
+ found steps 837
+ found steps 835
+ found steps 833
+ found steps 831
+ found steps 829
+ found steps 827
+ found steps 825
+ found steps 823
+ found steps 821
+ found steps 819
+ found steps 817
+ found steps 815
+ found steps 813
+ found steps 811
+ found steps 809
+ found steps 807
+ found steps 805
+ found steps 803
+ found steps 801
+ found steps 799
+ found steps 797
+ found steps 795
+ found steps 793
+ found steps 791
+ found steps 789
+ found steps 787
+ found steps 785
+ found steps 783
+ found steps 781
+ found steps 779
+ found steps 777
+ found steps 775
+ found steps 773
+ found steps 771
+ found steps 769
+ found steps 767
+ found steps 765
+ found steps 763
+ found steps 761
+ found steps 759
+ found steps 757
+ found steps 755
+ found steps 753
+ found steps 751
+ found steps 749
+ found steps 747
+ found steps 745
+ found steps 743
+ found steps 741
+ found steps 739
+ found steps 737
+ found steps 735
+ found steps 733
+ found steps 731
+ found steps 729
+ found steps 727
+ found steps 725
+ found steps 723
+ found steps 721
+ found steps 719
+ found steps 717
+ found steps 715
+ found steps 713
+ found steps 711
+ found steps 709
+ found steps 707
+ found steps 705
+ found steps 703
+ found steps 701
+ found steps 699
+ found steps 697
+ found steps 695
+ found steps 693
+ found steps 691
+ found steps 689
+ found steps 687
+ found steps 685
+ found steps 683
+ found steps 681
+ found steps 679
+ found steps 677
+ found steps 675
+ found steps 673
+ found steps 671
+ found steps 669
+ found steps 667
+ found steps 665
+ found steps 663
+ found steps 661
+ found steps 659
+ found steps 657
+ found steps 655
+ found steps 653
+ found steps 651
+ found steps 649
+ found steps 647
+ found steps 645
+ found steps 643
+ found steps 641
+ found steps 639
+ found steps 637
+ found steps 635
+ found steps 633
+ found steps 631
+ found steps 629
+ found steps 627
+ found steps 625
+ found steps 623
+ found steps 621
+ found steps 619
+ found steps 617
+ found steps 615
+ found steps 613
+ found steps 611
+ found steps 609
+ found steps 607
+ found steps 605
+ found steps 603
+ found steps 601
+ found steps 599
+ found steps 597
+ found steps 595
+ found steps 593
+ found steps 591
+ found steps 589
+ found steps 587
+ found steps 585
+ found steps 583
+ found steps 581
+ found steps 579
+ found steps 577
+ found steps 575
+ found steps 573
+ found steps 571
+ found steps 569
+ found steps 567
+ found steps 565
+ found steps 563
+ found steps 561
+ found steps 559
+ found steps 557
+ found steps 555
+ found steps 553
+ found steps 551
+ found steps 549
+ found steps 547
+ found steps 545
+ found steps 543
+ found steps 541
+ found steps 539
+ found steps 537
+ found steps 535
+ found steps 533
+ found steps 531
+ found steps 529
+ found steps 527
+ found steps 525
+ found steps 523
+ found steps 521
+ found steps 519
+ found steps 517
+ found steps 515
+ found steps 513
+ found steps 511
+ found steps 509
+ found steps 507
+ found steps 505
+ found steps 503
+ found steps 501
+ found steps 499
+ found steps 497
+ found steps 495
+ found steps 493
+ found steps 491
+ found steps 489
+ found steps 487
+ found steps 485
+ found steps 483
+ found steps 481
+ found steps 479
+ found steps 477
+ found steps 475
+ found steps 473
+ found steps 471
+ found steps 469
+ found steps 467
+ found steps 465
+ found steps 463
+ found steps 461
+ found steps 459
+ found steps 457
+ found steps 455
+ found steps 453
+ found steps 451
+ found steps 449
+ found steps 447
+ found steps 445
+ found steps 443
+ found steps 441
+ found steps 439
+ found steps 437
+ found steps 435
+ found steps 433
+ found steps 431
+ found steps 429
+ found steps 427
+ found steps 425
+ found steps 423
+ found steps 421
+ found steps 419
+ found steps 417
+ found steps 415
+ found steps 413
+ found steps 411
+ found steps 409
+ found steps 407
+ found steps 405
+ found steps 403
+ found steps 401
+ found steps 399
+ found steps 397
+ found steps 395
+ found steps 393
+ found steps 391
+ found steps 389
+ found steps 387
+ found steps 385
+ found steps 383
+ found steps 381
+ found steps 379
+ found steps 377
+ found steps 375
+ found steps 373
+ found steps 371
+ found steps 369
+ found steps 367
+ found steps 365
+ found steps 363
+ found steps 361
+ found steps 359
+ found steps 357
+ found steps 355
+ found steps 353
+ found steps 351
+ found steps 349
+ found steps 347
+ found steps 345
+ found steps 343
+ found steps 341
+ found steps 339
+timer "calc"	 sec: 3.342558
+
+part 1) : 339
+
+timer "main"	 sec: 3.342689
