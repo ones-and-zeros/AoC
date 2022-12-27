@@ -44,29 +44,41 @@ namespace {
 
 using PointsVisited = std::set<Point>;
 
-Heightmap current_heightmap;
-std::size_t g_least_steps_to_end{0};
-PointsVisited points_visited;
+Heightmap heightmap;
 std::size_t x_size = 0;
 std::size_t y_size = 0;
 Point end_point{};
 
+std::size_t least_steps{0};
+std::size_t least_steps_series{0};
+PointsVisited points_visited;
 std::map<Point, std::size_t> steps_per_point;
 
 }
 
-Point Find(const Heightmap& heightmap, const char c) {
+Point FindAPoint(const char c) {
   for (int y = 0; y < y_size; ++y) {
     for (int x = 0; x < x_size; ++x) {
       if( heightmap[y][x] == c)
         return {x,y};
     }
   }
-  throw std::logic_error("cannot find start");
+  throw std::logic_error("cannot find c");
+}
+
+std::vector<Point> FindAllPoints(const char c) {
+  std::vector<Point> points;
+  for (int y = 0; y < y_size; ++y) {
+    for (int x = 0; x < x_size; ++x) {
+      if( heightmap[y][x] == c)
+        points.push_back({x,y});
+    }
+  }
+  return points;
 }
 
 char GetChar(const Point point) {
-  return current_heightmap[point.y][point.x];
+  return heightmap[point.y][point.x];
 }
 
 bool CanTravelTo(const Point& from, const Point& to) {
@@ -115,13 +127,13 @@ void Step(Point position, std::size_t steps) {
   }
   steps_per_point[position] = steps;
 
-  if(steps > g_least_steps_to_end) {
+  if(steps > least_steps) {
     return;
   }
-  if('E' == GetChar(position)) {
-    if (steps < g_least_steps_to_end) {
-      g_least_steps_to_end = steps;
-      std::cout << " found steps " << steps << "\n";
+  if(end_point == position) {
+    if (steps < least_steps) {
+      least_steps = steps;
+//      std::cout << " found steps " << steps << "\n";
     }
     return;
   }
@@ -154,26 +166,34 @@ void Step(Point position, std::size_t steps) {
   points_visited.erase(position);
 }
 
-std::size_t CalcPart1(const Heightmap& heightmap) {
-  current_heightmap = heightmap;
-  g_least_steps_to_end = ~0;
+std::size_t StepsToEnd(Point start) {
+  least_steps = least_steps_series;
   points_visited.clear();
-  x_size = heightmap[0].size();
-  y_size = heightmap.size();
+  steps_per_point.clear();
+  end_point = FindAPoint('E');
 
-  end_point = Find(heightmap, 'E');
-  Point position = Find(heightmap, 'S');
+  Step(start, 0);
+  return least_steps;
+}
 
-  Step(position, 0);
+std::size_t CalcPart1() {
+  least_steps_series = ~0;
+  return StepsToEnd(FindAPoint('S'));
+}
 
-  return g_least_steps_to_end;
+std::size_t CalcPart2() {
+  least_steps_series = ~0;
+
+  const auto starting_points = FindAllPoints('a');
+  for(const auto& start : starting_points) {
+    least_steps_series = StepsToEnd(start);
+  }
+  return least_steps_series;
 }
 
 int main()
 {
   Timer t_main("main");
-
-  Heightmap heightmap;
 
   std::ifstream infile{"input.txt"};
   if (infile.is_open()) {
@@ -184,28 +204,33 @@ int main()
       heightmap.push_back(line);
     }
 
+    x_size = heightmap[0].size();
+    y_size = heightmap.size();
+
     infile.close();
   }
   else
     throw std::logic_error("unable to open input file");
   std::cout << "\n";
 
-  // input parse check
-  for (const auto& line : heightmap) {
-    std::cout << line << "\n";
-  }
-  std::cout << "\n";
+  // // input parse check
+  // for (const auto& line : heightmap) {
+  //   std::cout << line << "\n";
+  // }
+  // std::cout << "\n";
 
   std::size_t result_p1;
+  std::size_t result_p2;
 
   {
     Timer t_main("calc");
 
-    result_p1 = CalcPart1(heightmap);
+    result_p1 = CalcPart1();
+    result_p2 = CalcPart2();
   }
 
   std::cout << "\n";
   std::cout << "part 1) : " << result_p1 << "\n";
-//  std::cout << "part 2) : " << result_p2 << "\n";
+  std::cout << "part 2) : " << result_p2 << "\n";
   std::cout << "\n";
 }
