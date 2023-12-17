@@ -1,6 +1,8 @@
 #include <cstdint>
 #include <fstream>
 #include <iostream>
+#include <optional>
+#include <set>
 #include <vector>
 
 #include "timer.h"
@@ -42,6 +44,16 @@ struct Coordinate {
   int row;
   int col;
 };
+
+bool operator<(const Coordinate &point_a, const Coordinate &point_b) {
+  if (point_a.row < point_b.row) {
+    return true;
+  }
+  if (point_a.row > point_b.row) {
+    return false;
+  }
+  return (point_a.col == point_b.col);
+}
 
 constexpr std::array<Coordinate, 9> kNearby{
     Coordinate{-1, -1}, Coordinate{-1, 0}, Coordinate{-1, 1}, Coordinate{0, -1},
@@ -96,12 +108,92 @@ std::int64_t CalcPart1(const Schematic &schematic) {
   return value;
 }
 
-std::int64_t CalcPart2(void) {
+struct Asset {
+  int value;
+  std::vector<Coordinate> points;
+};
+
+using Assets = std::set<Asset>;
+
+bool operator<(const Asset &asset_a, const Asset &asset_b) {
+
+  if (asset_a.value < asset_b.value) {
+    return true;
+  }
+  if (asset_a.value > asset_b.value) {
+    return false;
+  }
+  if (asset_a.points.size() < asset_b.points.size()) {
+    return true;
+  }
+  if (asset_a.points.size() > asset_b.points.size()) {
+    return false;
+  }
+
+  return (asset_a.points[0].col < asset_b.points[0].col);
+}
+
+std::optional<Asset> GetAsset(const Schematic &schematic,
+                              const Coordinate &point) {
+
+  if (!isdigit(schematic[point.row][point.col])) {
+    return std::nullopt;
+  }
+
+  auto pos = point;
+  while (true) {
+    auto prior = Coordinate{pos.row, pos.col - 1};
+    if (prior.col < 0) {
+      break;
+    }
+    if (!isdigit(schematic[prior.row][prior.col])) {
+      break;
+    }
+    pos = prior;
+  }
+
+  std::string text{};
+  std::vector<Coordinate> points;
+  while (isdigit(schematic[pos.row][pos.col])) {
+    text += schematic[pos.row][pos.col];
+    points.push_back(pos);
+    pos = Coordinate{pos.row, pos.col + 1};
+    if (pos.col >= schematic[0].size()) {
+      break;
+    }
+  }
+
+  return Asset{.value = std::stoi(text), .points = points};
+}
+
+std::int64_t CalcPart2(const Schematic &schematic) {
   Timer t_main("calc p2");
 
   std::int64_t value{};
-  // TODO
+  for (auto row = 0; row < schematic.size(); row++) {
+    for (auto col = 0; col < schematic[0].size(); col++) {
+      const auto current_char = schematic[row][col];
+      const auto current_pos = Coordinate{row, col};
 
+      if (current_char == '*') {
+        Assets assets{};
+
+        for (const auto &nearby : kNearby) {
+          Coordinate pos{row + nearby.row, col + nearby.col};
+          const auto maybe_asset = GetAsset(schematic, pos);
+          if (maybe_asset.has_value()) {
+            assets.insert(maybe_asset.value());
+          }
+        }
+
+        if (assets.size() == 2) {
+          const auto gear_ratio =
+              (*assets.begin()).value * (*assets.rbegin()).value;
+          value += gear_ratio;
+        }
+      }
+    }
+  }
   return value;
 }
 
@@ -110,7 +202,7 @@ std::int64_t CalcPart2(void) {
 int main(int argc, char *argv[]) {
 
   if (argc != 2) {
-    throw std::logic_error("expected 1 argument for input filepath\n");
+    throw std::logic_error("expected 1 argument for input filepath");
   }
 
   auto schematic{ParseInput(argv[1])};
@@ -118,10 +210,10 @@ int main(int argc, char *argv[]) {
   // std::cout << games;
 
   auto result_p1 = CalcPart1(schematic);
-  auto result_p2 = CalcPart2();
+  auto result_p2 = CalcPart2(schematic);
 
   std::cout << "\n";
-  std::cout << "part 1) : " << result_p1 << "\n";
-  std::cout << "part 2) : " << result_p2 << "\n";
+  std::cout << "part 1: " << result_p1 << "\n";
+  std::cout << "part 2: " << result_p2 << "\n";
   std::cout << "\n";
 }
