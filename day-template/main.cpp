@@ -4,45 +4,56 @@
 
 #include "timer.h"
 
-std::int64_t CalcPart1() {
-  Timer t_main("calc p1");
-  return 0;
+namespace {
+
+void ParseInput(const char *file) {
+  Timer t_p("parse input");
+
+  std::ifstream infile{file};
+  if (!infile.is_open()) {
+    throw std::logic_error("unable to open input file\n");
+  }
+
+  std::string line;
+  while (getline(infile, line)) {
+    // std::istringstream iss{line};
+    // std::string text;
+    // int digits;
+    // iss >> text >> digits;
+  }
+
+  infile.close();
 }
 
-std::int64_t CalcPart2() {
-  Timer t_main("calc p2");
-  return 0;
+std::int64_t CalcPart1(void) {
+  Timer t_main("calc p1");
+
+  std::int64_t value{};
+  // TODO
+
+  return value;
 }
+
+std::int64_t CalcPart2(void) {
+  Timer t_main("calc p2");
+
+  std::int64_t value{};
+  // TODO
+
+  return value;
+}
+
+} // namespace
 
 int main(int argc, char *argv[]) {
 
   if (argc != 2) {
-    std::cout << "error, expected 1 argument for input filepath\n";
-    return 1;
+    throw std::logic_error("expected 1 argument for input filepath\n");
   }
 
-  std::ifstream infile{argv[1]};
-  if (!infile.is_open()) {
-    std::cout << "error, unable to open input file\n";
-    return 2;
-  }
+  // Games games{ParseInput(argv[1])};
 
-  {
-    Timer t_p("parse input");
-
-    std::string line;
-    while (getline(infile, line)) {
-      // ...
-    }
-
-    infile.close();
-  }
-  std::cout << "\n";
-
-  // // input parse check
-  // for (...) {
-  //   std::cout << ... << "\n";
-  // }
+  // std::cout << games;
 
   auto result_p1 = CalcPart1();
   auto result_p2 = CalcPart2();
