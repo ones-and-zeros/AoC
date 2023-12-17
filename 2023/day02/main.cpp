@@ -163,9 +163,31 @@ std::int64_t CalcPart1(const Games &games) {
   return value;
 }
 
+Cubes MinSetOfCubes(const Gameplay &gameplay) {
+  Cubes cubes{};
+
+  for (const auto &game : gameplay) {
+    cubes.red = std::max(game.red, cubes.red);
+    cubes.green = std::max(game.green, cubes.green);
+    cubes.blue = std::max(game.blue, cubes.blue);
+  }
+  return cubes;
+}
+
 std::int64_t CalcPart2(const Games &games) {
   Timer t_main("calc p2");
-  return 0;
+
+  std::int64_t value{};
+  for (const auto &game : games) {
+    const auto min_set = MinSetOfCubes(game);
+    const auto power = min_set.red * min_set.green * min_set.blue;
+
+    // std::cout << min_set << "\n";
+
+    value += power;
+  }
+
+  return value;
 }
 
 } // namespace
