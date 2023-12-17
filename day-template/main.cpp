@@ -4,10 +4,20 @@
 
 #include "timer.h"
 
+std::int64_t CalcPart1() {
+  Timer t_main("calc p1");
+  return 0;
+}
+
+std::int64_t CalcPart2() {
+  Timer t_main("calc p2");
+  return 0;
+}
+
 int main(int argc, char *argv[]) {
 
   if (argc != 2) {
-    std::cout << "error, expected 1 argument for inputfile filepath\n";
+    std::cout << "error, expected 1 argument for input filepath\n";
     return 1;
   }
 
@@ -34,18 +44,11 @@ int main(int argc, char *argv[]) {
   //   std::cout << ... << "\n";
   // }
 
-  {
-    Timer t_main("calc");
-
-    // ...
-  }
+  auto result_p1 = CalcPart1();
+  auto result_p2 = CalcPart2();
 
   std::cout << "\n";
-  std::cout << "part 1) : "
-            << "TODO"
-            << "\n";
-  std::cout << "part 2) : "
-            << "TODO"
-            << "\n";
+  std::cout << "part 1) : " << result_p1 << "\n";
+  std::cout << "part 2) : " << result_p2 << "\n";
   std::cout << "\n";
 }
