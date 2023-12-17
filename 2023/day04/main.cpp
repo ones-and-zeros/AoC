@@ -1,4 +1,5 @@
 #include <array>
+#include <cassert>
 #include <cstdint>
 #include <fstream>
 #include <iostream>
@@ -61,19 +62,24 @@ Cards ParseInput(const char *file) {
   return cards;
 }
 
+int Matches(const Card &card) {
+  int matches{};
+  for (const auto &play : card.playing) {
+    for (const auto &win : card.winning) {
+      if (play == win) {
+        matches++;
+      }
+    }
+  }
+  return matches;
+}
+
 std::int64_t CalcPart1(const Cards &cards) {
   Timer t_main("calc p1");
 
   std::int64_t value{};
   for (const auto &card : cards) {
-    int matches{};
-    for (const auto &play : card.playing) {
-      for (const auto &win : card.winning) {
-        if (play == win) {
-          matches++;
-        }
-      }
-    }
+    int matches{Matches(card)};
     if (matches > 0) {
       auto prize = 1U << (matches - 1);
 
@@ -83,11 +89,33 @@ std::int64_t CalcPart1(const Cards &cards) {
   return value;
 }
 
-std::int64_t CalcPart2(void) {
+std::int64_t CalcPart2(const Cards &cards) {
   Timer t_main("calc p2");
 
+  std::vector<int> card_qtys(cards.size(), 1);
+
+  for (const auto &qty : card_qtys) {
+    std::cout << qty << "\n";
+  }
+  std::cout << "\n";
+
   std::int64_t value{};
-  // TODO
+  for (auto pos = 0; pos < cards.size(); pos++) {
+    int matches = Matches(cards[pos]);
+    for (auto count = 0; count < matches; count++) {
+      auto offset = pos + 1 + count;
+      if (offset >= card_qtys.size()) {
+        break;
+      }
+      card_qtys[offset] += card_qtys[pos];
+    }
+  }
+
+  for (const auto &qty : card_qtys) {
+    std::cout << qty << "\n";
+
+    value += qty;
+  }
 
   return value;
 }
@@ -103,10 +131,10 @@ int main(int argc, char *argv[]) {
   auto cards = ParseInput(argv[1]);
 
   auto result_p1 = CalcPart1(cards);
-  auto result_p2 = CalcPart2();
+  auto result_p2 = CalcPart2(cards);
 
   std::cout << "\n";
-  std::cout << "part 1) : " << result_p1 << "\n";
-  std::cout << "part 2) : " << result_p2 << "\n";
+  std::cout << "part 1: " << result_p1 << "\n";
+  std::cout << "part 2: " << result_p2 << "\n";
   std::cout << "\n";
 }
