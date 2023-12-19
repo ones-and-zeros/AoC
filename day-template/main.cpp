@@ -6,12 +6,15 @@
 
 namespace {
 
-void ParseInput(const char *file) {
+
+using Input = int;
+
+Input ParseInput(const char *file) {
   Timer t_p("parse input");
 
   std::ifstream infile{file};
   if (!infile.is_open()) {
-    throw std::logic_error("unable to open input file\n");
+    throw std::logic_error("unable to open input file");
   }
 
   std::string line;
@@ -23,6 +26,8 @@ void ParseInput(const char *file) {
   }
 
   infile.close();
+
+  return 0;
 }
 
 std::int64_t CalcPart1(void) {
@@ -48,10 +53,10 @@ std::int64_t CalcPart2(void) {
 int main(int argc, char *argv[]) {
 
   if (argc != 2) {
-    throw std::logic_error("expected 1 argument for input filepath\n");
+    throw std::logic_error("expected 1 argument for input filepath");
   }
 
-  // Games games{ParseInput(argv[1])};
+  auto input = ParseInput(argv[1]);
 
   // std::cout << games;
 
