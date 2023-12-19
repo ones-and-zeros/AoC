@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <fstream>
 #include <iostream>
+#include <set>
 #include <vector>
 
 #include "timer.h"
@@ -37,6 +38,17 @@ std::int64_t Transform(const Mapping &mapping, std::int64_t source) {
     }
   }
   return source;
+}
+
+std::int64_t TransformRev(const Mapping &mapping, std::int64_t destination) {
+  for (auto count = 0; count < mapping.size(); count++) {
+    const auto &map = mapping[mapping.size() - (1 + count)];
+    if (destination >= map.destination &&
+        destination < map.destination + map.length) {
+      return map.source + (destination - map.destination);
+    }
+  }
+  return destination;
 }
 
 Input ParseInput(const char *file) {
@@ -114,13 +126,54 @@ std::int64_t CalcPart1(const Input &input) {
   return to_transform[0];
 }
 
-std::int64_t CalcPart2(void) {
+struct SeedRange {
+  std::int64_t location;
+  std::int64_t length;
+};
+
+using SeedRanges = std::vector<SeedRange>;
+
+SeedRanges ParseSeedRanges(const Seeds &seeds) {
+  SeedRanges ranges{};
+
+  for (auto pos = 0; pos < seeds.size(); pos += 2) {
+    ranges.push_back(SeedRange{seeds[pos + 0], seeds[pos + 1]});
+  }
+  return ranges;
+}
+
+bool IsWithin(const SeedRanges &ranges, std::int64_t seed) {
+  for (const auto &range : ranges) {
+    if ((seed >= range.location) && (seed < (range.location + range.length))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+std::int64_t CalcPart2(const Input &input) {
   Timer t_main("calc p2");
 
-  std::int64_t value{};
-  // TODO
+  const auto seed_ranges = ParseSeedRanges(input.seeds);
 
-  return value;
+  for (auto location = std::int64_t{1};
+       location < std::numeric_limits<std::int64_t>::max(); location++) {
+    auto item = location;
+
+    // std::cout << "loc " << item;
+
+    for (auto count = 0; count < input.mappings.size(); count++) {
+      item = TransformRev(input.mappings[input.mappings.size() - (1 + count)],
+                          item);
+      // std::cout << " -> " << item;
+    }
+    // std::cout << "\n";
+
+    if (IsWithin(seed_ranges, item)) {
+      return location;
+    }
+  }
+  throw std::logic_error("no seed found");
 }
 
 } // namespace
@@ -134,9 +187,7 @@ int main(int argc, char *argv[]) {
   auto input = ParseInput(argv[1]);
 
   auto result_p1 = CalcPart1(input);
-  auto result_p2 = CalcPart2();
-
-  std::cout << "\n";
+  auto result_p2 = CalcPart2(input);
   std::cout << "part 1) : " << result_p1 << "\n";
   std::cout << "part 2) : " << result_p2 << "\n";
   std::cout << "\n";
