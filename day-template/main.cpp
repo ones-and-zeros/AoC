@@ -6,7 +6,6 @@
 
 namespace {
 
-
 using Input = int;
 
 Input ParseInput(const char *file) {
@@ -30,22 +29,16 @@ Input ParseInput(const char *file) {
   return 0;
 }
 
-std::int64_t CalcPart1(void) {
+std::int64_t CalcPart1(const Input &input) {
   Timer t_main("calc p1");
 
-  std::int64_t value{};
-  // TODO
-
-  return value;
+  return 0;
 }
 
-std::int64_t CalcPart2(void) {
+std::int64_t CalcPart2(const Input &input) {
   Timer t_main("calc p2");
 
-  std::int64_t value{};
-  // TODO
-
-  return value;
+  return 0;
 }
 
 } // namespace
@@ -58,10 +51,8 @@ int main(int argc, char *argv[]) {
 
   auto input = ParseInput(argv[1]);
 
-  // std::cout << games;
-
-  auto result_p1 = CalcPart1();
-  auto result_p2 = CalcPart2();
+  auto result_p1 = CalcPart1(input);
+  auto result_p2 = CalcPart2(input);
 
   std::cout << "\n";
   std::cout << "part 1) : " << result_p1 << "\n";
