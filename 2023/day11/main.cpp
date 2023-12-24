@@ -25,11 +25,6 @@ template <class T> auto Difference(const T &a, const T &b) {
   return b - a;
 }
 
-std::int64_t MinDistance(const Point &point_a, const Point &point_b) {
-  return Difference(point_a.row, point_b.row) +
-         Difference(point_a.col, point_b.col);
-}
-
 struct Image {
   auto GetRowSize() const noexcept { return rows.size(); }
   auto GetColSize() const noexcept { return rows.size() ? rows[0].size() : 0; }
@@ -43,6 +38,45 @@ struct Image {
 
   bool IsPointValid(const Point &point) const {
     return (point.row < GetRowSize()) && (point.col < GetColSize());
+  }
+
+  bool IsRowEmpty(std::size_t row) const {
+    for (auto col = 0U; col < GetColSize(); col++) {
+      if (IsGalaxyAtPoint({row, col})) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool IsColEmpty(std::size_t col) const {
+    for (auto row = 0U; row < GetRowSize(); row++) {
+      if (IsGalaxyAtPoint({row, col})) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  std::int64_t Distance(const Point &point_a, const Point &point_b,
+                        const std::int64_t &expansion_factor) const {
+    std::int64_t distance = 0;
+
+    auto row_start = std::min(point_a.row, point_b.row);
+    auto row_stop = std::max(point_a.row, point_b.row);
+    for (auto row = row_start; row < row_stop; row++) {
+      distance += IsRowEmpty(row) ? expansion_factor : 1;
+    }
+
+    auto col_start = std::min(point_a.col, point_b.col);
+    auto col_stop = std::max(point_a.col, point_b.col);
+    for (auto col = col_start; col < col_stop; col++) {
+      distance += IsColEmpty(col) ? expansion_factor : 1;
+    }
+
+    return distance;
   }
 
   std::vector<std::string> rows;
@@ -59,46 +93,6 @@ std::ostream &operator<<(std::ostream &os, const Image &image) {
   return os;
 }
 
-Image ExpandImage(const Image &original) noexcept {
-  Image expanded{original};
-
-  // expand empty rows
-  for (auto row = 0U; row < expanded.GetRowSize(); row++) {
-    auto galaxy_found_in_col = false;
-    for (auto col = 0U; col < expanded.GetColSize(); col++) {
-      const auto current_point = Point{row, col};
-      if (expanded.IsGalaxyAtPoint(current_point)) {
-        galaxy_found_in_col = true;
-        break;
-      }
-    }
-    if (!galaxy_found_in_col) {
-      expanded.rows.insert(expanded.rows.begin() + row, expanded.rows[row]);
-      row++;
-    }
-  }
-
-  // expand empty columns
-  for (auto col = 0U; col < expanded.GetColSize(); col++) {
-    auto galaxy_found_in_row = false;
-    for (auto row = 0U; row < expanded.GetRowSize(); row++) {
-      const auto current_point = Point{row, col};
-      if (expanded.IsGalaxyAtPoint(current_point)) {
-        galaxy_found_in_row = true;
-        break;
-      }
-    }
-    if (!galaxy_found_in_row) {
-      for (auto row = 0U; row < expanded.GetRowSize(); row++) {
-        expanded.rows[row].insert(expanded.rows[row].begin() + col, '.');
-      }
-      col++;
-    }
-  }
-
-  return expanded;
-}
-
 std::vector<Point> FindAllGalaxies(const Image &image) {
   std::vector<Point> galaxies{};
 
@@ -112,17 +106,15 @@ std::vector<Point> FindAllGalaxies(const Image &image) {
   return galaxies;
 }
 
-std::int64_t FindSumMinDistancesForPairs(const std::vector<Point> &points) {
+std::int64_t FindSumMinDistancesForPairs(const Image &image,
+                                         const std::vector<Point> &points,
+                                         const std::int64_t &expansion_factor) {
 
   std::int64_t sum{};
 
   for (auto pos_a = 0U; pos_a < points.size(); pos_a++) {
     for (auto pos_b = pos_a + 1; pos_b < points.size(); pos_b++) {
-      const auto min_distance = MinDistance(points[pos_a], points[pos_b]);
-      sum += min_distance;
-
-      // std::cout << points[pos_a] << "," << points[pos_b] << " " << min_distance
-      //           << "\n";
+      sum += image.Distance(points[pos_a], points[pos_b], expansion_factor);
     }
   }
   return sum;
@@ -141,10 +133,6 @@ Image ParseInput(const char *file) {
   std::string line;
   while (getline(infile, line)) {
     image.rows.push_back(line);
-    // std::istringstream iss{line};
-    // std::string text;
-    // int digits;
-    // iss >> text >> digits;
   }
 
   infile.close();
@@ -155,16 +143,13 @@ Image ParseInput(const char *file) {
 std::int64_t CalcPart1(const Image &image) {
   Timer t_main("calc p1");
 
-  const auto expanded = ExpandImage(image);
-  const auto galaxies = FindAllGalaxies(expanded);
-
-  return FindSumMinDistancesForPairs(galaxies);
+  return FindSumMinDistancesForPairs(image, FindAllGalaxies(image), 2);
 }
 
 std::int64_t CalcPart2(const Image &image) {
   Timer t_main("calc p2");
 
-  return 0;
+  return FindSumMinDistancesForPairs(image, FindAllGalaxies(image), 1'000'000);
 }
 
 } // namespace
