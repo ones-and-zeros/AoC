@@ -48,10 +48,31 @@ Contraption ParseInput(const char *file) {
 
 enum class Dir : std::uint8_t {
   North = 0,
+  iBegin = North,
   South,
   East,
   West,
+  iEnd,
 };
+
+Dir &operator++(Dir &dir, int) {
+  switch (dir) {
+  case Dir::North:
+    dir = Dir::South;
+    break;
+  case Dir::South:
+    dir = Dir::East;
+    break;
+  case Dir::East:
+    dir = Dir::West;
+    break;
+  case Dir::West:
+    dir = Dir::iEnd;
+    break;
+  }
+
+  return dir;
+}
 
 enum class Space : char {
   Empty = '.',
@@ -124,24 +145,24 @@ bool operator<(const Move &lso, const Move &rso) {
   return lso.dir < rso.dir;
 }
 
-std::set<Point> Travel(const Contraption &contraption, const Move &move) {
+std::set<Move> moves_made{};
+std::set<Point> energized{};
+
+void Travel(const Contraption &contraption, const Move &move) {
   if (move.location.row < 0 || move.location.row >= contraption.size()) {
-    return {};
+    return;
   }
 
   if (move.location.column < 0 ||
       move.location.column >= contraption[0].size()) {
-    return {};
+    return;
   }
 
-  static std::set<Move> moves_made{};
-
   if (moves_made.find(move) != moves_made.end()) {
-    return {};
+    return;
   }
   moves_made.insert(move);
 
-  std::set<Point> energized{};
   energized.insert(move.location);
 
   const Space current_space =
@@ -149,70 +170,90 @@ std::set<Point> Travel(const Contraption &contraption, const Move &move) {
 
   switch (current_space) {
   case Space::Empty: {
-    energized.merge(Travel(contraption, {NextPoint(move), move.dir}));
+    Travel(contraption, {NextPoint(move), move.dir});
     break;
   }
   case Space::MirrorLeft: {
     auto new_dir = NewDirMirrorLeft(move.dir);
-    energized.merge(
-        Travel(contraption, {NextPoint({move.location, new_dir}), new_dir}));
+
+    Travel(contraption, {NextPoint({move.location, new_dir}), new_dir});
     break;
   }
   case Space::MirrorRight: {
     auto new_dir = NewDirMirrorRight(move.dir);
-    energized.merge(
-        Travel(contraption, {NextPoint({move.location, new_dir}), new_dir}));
+
+    Travel(contraption, {NextPoint({move.location, new_dir}), new_dir});
     break;
   }
   case Space::SplitterHorizontal: {
     if (move.dir == Dir::East || move.dir == Dir::West) {
-      energized.merge(Travel(contraption, {NextPoint(move), move.dir}));
+      Travel(contraption, {NextPoint(move), move.dir});
       break;
     }
-    energized.merge(Travel(contraption,
-                           {NextPoint({move.location, Dir::East}), Dir::East}));
-    energized.merge(Travel(contraption,
-                           {NextPoint({move.location, Dir::West}), Dir::West}));
+    Travel(contraption, {NextPoint({move.location, Dir::East}), Dir::East});
+    Travel(contraption, {NextPoint({move.location, Dir::West}), Dir::West});
     break;
   }
   case Space::SplitterVertical: {
     if (move.dir == Dir::North || move.dir == Dir::South) {
-      energized.merge(Travel(contraption, {NextPoint(move), move.dir}));
+      Travel(contraption, {NextPoint(move), move.dir});
       break;
     }
-    energized.merge(Travel(
-        contraption, {NextPoint({move.location, Dir::North}), Dir::North}));
-    energized.merge(Travel(
-        contraption, {NextPoint({move.location, Dir::South}), Dir::South}));
+    Travel(contraption, {NextPoint({move.location, Dir::North}), Dir::North});
+    Travel(contraption, {NextPoint({move.location, Dir::South}), Dir::South});
     break;
   }
   }
-  return energized;
+}
+
+std::int64_t Calc(const Contraption &contraption, const Move &first) {
+  energized.clear();
+  moves_made.clear();
+
+  Travel(contraption, first);
+
+  return energized.size();
 }
 
 std::int64_t CalcPart1(const Contraption &contraption) {
   Timer t_main("calc p1");
 
-  const auto energized = Travel(contraption, {{0, 0}, Dir::East});
-
-  for (auto row = 0; row < contraption.size(); row++) {
-    for (auto col = 0; col < contraption[0].size(); col++) {
-      if (energized.find({row, col}) != energized.end()) {
-        std::cout << "#";
-        continue;
-      }
-      std::cout << contraption[row][col];
-    }
-    std::cout << "\n";
-  }
-
-  return energized.size();
+  return Calc(contraption, {{0, 0}, Dir::East});
 }
 
 std::int64_t CalcPart2(const Contraption &contraption) {
   Timer t_main("calc p2");
 
-  return 0;
+  std::set<Point> best_energized{};
+  // std::set<Move> best_moves_made{};
+
+  for (auto row = 0; row < contraption.size(); row++) {
+    Calc(contraption, Move{{row, 0}, Dir::East});
+    if (energized.size() > best_energized.size()) {
+      best_energized = energized;
+    }
+
+    Calc(contraption,
+         Move{{row, static_cast<int>(contraption[0].size() - 1)}, Dir::West});
+    if (energized.size() > best_energized.size()) {
+      best_energized = energized;
+    }
+  }
+
+  for (auto col = 0; col < contraption.size(); col++) {
+    Calc(contraption, Move{{0, col}, Dir::South});
+    if (energized.size() > best_energized.size()) {
+      best_energized = energized;
+    }
+
+    Calc(contraption,
+         Move{{static_cast<int>(contraption.size() - 1), col}, Dir::North});
+    if (energized.size() > best_energized.size()) {
+      best_energized = energized;
+    }
+  }
+
+  return best_energized.size();
 }
 
 } // namespace
